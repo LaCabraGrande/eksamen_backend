@@ -1,0 +1,143 @@
+### Her tester vi et simpelt endpoint
+GET http://localhost:7070/api/auth/test/
+
+### Her fylder vi databasen med doctordata
+GET http://localhost:7070/api/guides/populate
+Content-Type: application/json
+
+### Her opretter vi en bruger med en user rolle
+POST http://localhost:7070/api/auth/register/
+Content-Type: application/json
+
+{
+    "username": "user",
+    "password": "test123"
+}
+
+### Her logger vi ind med brugeren
+POST http://localhost:7070/api/auth/login/
+
+{
+    "username": "user",
+    "password": "test123"
+}
+
+> {%
+    client.global.set("jwt_token", response.body.token);
+    console.log("JWT Token:", client.global.get("jwt_token"));
+%}
+
+### Her henter vi en bruger med en user rolle
+GET http://localhost:7070/api/protected/user_demo/
+Accept: application/json
+Authorization: Bearer {{jwt_token}}
+
+### Her henter vi en bruger med en admin rolle
+GET http://localhost:7070/api/protected/admin_demo/
+Accept: application/json
+Authorization: Bearer {{jwt_token}}
+
+### Her tilføjer vi en superman rolle til brugeren
+POST http://localhost:7070/api/auth/user/addrole/
+Accept: application/json
+Authorization: Bearer {{jwt_token}}
+
+{
+    "role": "superman"
+}
+Accept: application/json
+Authorization: Bearer {{jwt_token}}
+
+### Her tilføjer vi en admin rolle til brugeren
+POST http://localhost:7070/api/auth/user/addrole/
+Accept: application/json
+Authorization: Bearer {{jwt_token}}
+
+{
+    "role": "admin"
+}
+Accept: application/json
+Authorization: Bearer {{jwt_token}}
+
+### Her henter vi alle guides og deres trips
+GET http://localhost:7070/api/guides
+Accept: application/json
+
+### Her henter vi en guide ud fra id på guide og dennes trips
+GET http://localhost:7070/api/guides/1
+Accept: application/json
+
+### Her opretter vi en guide
+POST http://localhost:7070/api/guides
+Content-Type: application/json
+Authorization: Bearer {{jwt_token}}
+
+{
+  "firstname": "Hans",
+  "lastname": "Hansen",
+  "email": "hanshansen@gmail.com",
+  "phone": 12345678,
+  "yearsOfExperience": 5
+}
+
+### Her opdaterer vi en guide ud fra id på guide
+PUT http://localhost:7070/api/guides/4
+Content-Type: application/json
+Authorization: Bearer {{jwt_token}}
+
+{
+  "firstname": "Hans",
+  "lastname": "Hansen",
+  "email": "hanshansen@gmail.com",
+  "phone": "12345678",
+  "yearsOfExperience": 6
+}
+
+### Her sletter vi en guide ud fra id
+DELETE http://localhost:7070/api/guides/3
+Authorization: Bearer {{jwt_token}}
+
+// Appointment API
+
+### Her henter vi alle trips
+GET http://localhost:7070/api/trips
+
+### Her henter vi en trip ud fra id
+GET http://localhost:7070/api/trips/1
+
+### Her tilføjer vi en trip til en guide
+POST http://localhost:7070/api/trips/guide/2
+Content-Type: application/json
+Authorization: Bearer {{jwt_token}}
+
+{
+  "starttime": "10:00",
+  "endtime": "12:00",
+  "longitude": "12.345678",
+  "latitude": "56.789012",
+  "name": "Trip to the beach",
+  "price": 100,
+  "categoryType": "FOREST"
+}
+
+### Her opdaterer vi en trip ud fra id
+PUT http://localhost:7070/api/trips/13
+Content-Type: application/json
+Authorization: Bearer {{jwt_token}}
+
+{
+  "starttime": "10:00",
+  "endtime": "12:00",
+  "longitude": "12.345678",
+  "latitude": "56.789012",
+  "name": "Trip to the beach",
+  "price": 100,
+  "categoryType": "BEACH"
+}
+
+### Her sletter vi en trip ud fra id
+DELETE http://localhost:7070/api/trips/13
+Authorization: Bearer {{jwt_token}}
+
+
+
