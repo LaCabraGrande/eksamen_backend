@@ -1,7 +1,7 @@
 ### Her tester vi et simpelt endpoint
 GET http://localhost:7070/api/auth/test/
 
-### Her fylder vi databasen med doctordata
+### Her fylder vi databasen med data
 GET http://localhost:7070/api/guides/populate
 Content-Type: application/json
 
@@ -59,11 +59,11 @@ Authorization: Bearer {{jwt_token}}
 Accept: application/json
 Authorization: Bearer {{jwt_token}}
 
-### Her henter vi alle guides og deres trips
+### Her henter vi alle guides
 GET http://localhost:7070/api/guides
 Accept: application/json
 
-### Her henter vi en guide ud fra id på guide og dennes trips
+### Her henter vi en guide ud fra id på guide
 GET http://localhost:7070/api/guides/1
 Accept: application/json
 
@@ -121,7 +121,7 @@ Authorization: Bearer {{jwt_token}}
 }
 
 ### Her opdaterer vi en trip ud fra id
-PUT http://localhost:7070/api/trips/13
+PUT http://localhost:7070/api/trips/12
 Content-Type: application/json
 Authorization: Bearer {{jwt_token}}
 

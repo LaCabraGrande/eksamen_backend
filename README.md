@@ -7,18 +7,18 @@ Dato: 04.11.2024
 
 
 ## Beskrivelse:
-Medical Appointment API er en RESTful webtjeneste, der giver mulighed for at oprette, læse, opdatere og slette
+Guide API er en RESTful webtjeneste, der giver mulighed for at oprette, læse, opdatere og slette
 læger og deres aftaler. API'et understøtter også brugerregistrering og -godkendelse med JWT-token-baseret
 autentificering. API'et er bygget med Java og Javalin og bruger en PostgreSQL-database til at gemme data.
 
 
 ## Hvordan det kører
 
-- Opret en database i din lokale Postgres-instans kaldet ?.
+- Opret en database i din lokale Postgres-instans kaldet guide.
 - Kør hovedmetoden i Main-klassen for at starte serveren på port 7070 og oprette tabellerne i databasen. For at populere
   databasen med nogle testdata kan du køre endpointet http://localhost:7070/api/?/populate.
 - Se alle routes i din browser på http://localhost:7070/api/routes.
-- Anmod om endpointet http://localhost:7070/api/?/ i din browser for at se listen over ?.
+- Anmod om endpointet http://localhost:7070/api/guides/ i din browser for at se listen over guides.
 - Brug .http-filen i resources-mappen til at teste routes. GET/POST/PUT/DELETE-anmodninger er tilgængelige. Du vil også
   finde securityroutes i .http-filen.
 
@@ -113,268 +113,8 @@ Response file saved.
 
 Response code: 200 (OK); Time: 34ms (34 ms); Content length: 37 bytes (37 B)
 
-GET http://localhost:7070/api/doctors
+GET http://localhost:7070/api/guides
 
-HTTP/1.1 200 OK
-Date: Tue, 29 Oct 2024 17:39:14 GMT
-Content-Type: application/json
-Content-Length: 1328
-
-[
-{
-"id": 1,
-"name": "Dr. Smith",
-"dateOfBirth": "1970-01-01",
-"yearOfGraduation": 1995,
-"nameOfClinic": "City Hospital",
-"specialityType": "FAMILY",
-"appointments": [
-{
-"id": 2,
-"clientName": "John Smith",
-"date": "2024-10-01",
-"time": "08:00",
-"comment": "First visit"
-},
-{
-"id": 1,
-"clientName": "Jane Doe",
-"date": "2024-10-02",
-"time": "09:30",
-"comment": "Check-up"
-}
-],
-"createdAt": "2024-10-29 18:38:23",
-"updatedAt": "2024-10-29 18:38:23"
-},
-{
-"id": 2,
-"name": "Dr. Doe",
-"dateOfBirth": "1975-02-02",
-"yearOfGraduation": 2000,
-"nameOfClinic": "County Hospital",
-"specialityType": "PEDIATRICS",
-"appointments": [
-{
-"id": 4,
-"clientName": "Alice Johnson",
-"date": "2024-10-03",
-"time": "10:00",
-"comment": "Consultation"
-},
-{
-"id": 3,
-"clientName": "Bob Brown",
-"date": "2024-10-04",
-"time": "11:30",
-"comment": "Treatment"
-}
-],
-"createdAt": "2024-10-29 18:38:23",
-"updatedAt": "2024-10-29 18:38:23"
-},
-{
-"id": 3,
-"name": "Dr. Johnson",
-"dateOfBirth": "1980-03-03",
-"yearOfGraduation": 2005,
-"nameOfClinic": "State Hospital",
-"specialityType": "GERIATRICS",
-"appointments": [
-{
-"id": 7,
-"clientName": "Eve Green",
-"date": "2024-10-07",
-"time": "15:00",
-"comment": "Check-up"
-},
-{
-"id": 6,
-"clientName": "Charlie White",
-"date": "2024-10-05",
-"time": "13:00",
-"comment": "Follow-up"
-},
-{
-"id": 5,
-"clientName": "David Black",
-"date": "2024-10-06",
-"time": "14:30",
-"comment": "Second visit"
-}
-],
-"createdAt": "2024-10-29 18:38:23",
-"updatedAt": "2024-10-29 18:38:23"
-}
-]
-Response file saved.
-> 2024-10-29T183914.200.json
-
-Response code: 200 (OK); Time: 14ms (14 ms); Content length: 1328 bytes (1.33 kB)
-
-GET http://localhost:7070/api/doctors/1
-
-HTTP/1.1 200 OK
-Date: Tue, 29 Oct 2024 17:41:04 GMT
-Content-Type: application/json
-Content-Length: 403
-
-{
-"id": 1,
-"name": "Dr. Smith",
-"dateOfBirth": "1970-01-01",
-"yearOfGraduation": 1995,
-"nameOfClinic": "City Hospital",
-"specialityType": "FAMILY",
-"appointments": [
-{
-"id": 2,
-"clientName": "John Smith",
-"date": "2024-10-01",
-"time": "08:00",
-"comment": "First visit"
-},
-{
-"id": 1,
-"clientName": "Jane Doe",
-"date": "2024-10-02",
-"time": "09:30",
-"comment": "Check-up"
-}
-],
-"createdAt": "2024-10-29 18:38:23",
-"updatedAt": "2024-10-29 18:38:23"
-}
-Response file saved.
-> 2024-10-29T184104.200.json
-
-Response code: 200 (OK); Time: 10ms (10 ms); Content length: 403 bytes (403 B)
-
-GET http://localhost:7070/api/doctors/speciality/FAMILY
-
-HTTP/1.1 200 OK
-Date: Tue, 29 Oct 2024 17:41:32 GMT
-Content-Type: application/json
-Content-Length: 405
-
-[
-{
-"id": 1,
-"name": "Dr. Smith",
-"dateOfBirth": "1970-01-01",
-"yearOfGraduation": 1995,
-"nameOfClinic": "City Hospital",
-"specialityType": "FAMILY",
-"appointments": [
-{
-"id": 2,
-"clientName": "John Smith",
-"date": "2024-10-01",
-"time": "08:00",
-"comment": "First visit"
-},
-{
-"id": 1,
-"clientName": "Jane Doe",
-"date": "2024-10-02",
-"time": "09:30",
-"comment": "Check-up"
-}
-],
-"createdAt": "2024-10-29 18:38:23",
-"updatedAt": "2024-10-29 18:38:23"
-}
-]
-Response file saved.
-> 2024-10-29T184132.200.json
-
-Response code: 200 (OK); Time: 10ms (10 ms); Content length: 405 bytes (405 B)
-
-GET http://localhost:7070/api/doctors/birthdate/range?from=1970-01-01&to=1975-01-01
-
-HTTP/1.1 200 OK
-Date: Tue, 29 Oct 2024 17:42:05 GMT
-Content-Type: application/json
-Content-Length: 405
-
-[
-{
-"id": 1,
-"name": "Dr. Smith",
-"dateOfBirth": "1970-01-01",
-"yearOfGraduation": 1995,
-"nameOfClinic": "City Hospital",
-"specialityType": "FAMILY",
-"appointments": [
-{
-"id": 1,
-"clientName": "Jane Doe",
-"date": "2024-10-02",
-"time": "09:30",
-"comment": "Check-up"
-},
-{
-"id": 2,
-"clientName": "John Smith",
-"date": "2024-10-01",
-"time": "08:00",
-"comment": "First visit"
-}
-],
-"createdAt": "2024-10-29 18:38:23",
-"updatedAt": "2024-10-29 18:38:23"
-}
-]
-Response file saved.
-> 2024-10-29T184205.200.json
-
-Response code: 200 (OK); Time: 21ms (21 ms); Content length: 405 bytes (405 B)
-
-POST http://localhost:7070/api/doctors
-
-HTTP/1.1 201 Created
-Date: Tue, 29 Oct 2024 17:42:46 GMT
-Content-Type: application/json
-Content-Length: 222
-
-{
-"id": 4,
-"name": "Hans Larsen",
-"dateOfBirth": "1970-02-23",
-"yearOfGraduation": 2000,
-"nameOfClinic": "Hans Clinic",
-"specialityType": "SURGERY",
-"appointments": [],
-"createdAt": "2024-10-29 18:42:46",
-"updatedAt": "2024-10-29 18:42:46"
-}
-Response file saved.
-> 2024-10-29T184246.201.json
-
-Response code: 201 (Created); Time: 49ms (49 ms); Content length: 222 bytes (222 B)
-
-PUT http://localhost:7070/api/doctors/1
-
-HTTP/1.1 200 OK
-Date: Tue, 29 Oct 2024 17:43:18 GMT
-Content-Type: application/json
-Content-Length: 225
-
-{
-"id": 1,
-"name": "Hans Larsen",
-"dateOfBirth": "1970-02-23",
-"yearOfGraduation": 2000,
-"nameOfClinic": "Rigshospitalet",
-"specialityType": "SURGERY",
-"appointments": [],
-"createdAt": "2024-10-29 18:38:23",
-"updatedAt": "2024-10-29 18:43:18"
-}
-Response file saved.
-> 2024-10-29T184318.200.json
-
-Response code: 200 (OK); Time: 39ms (39 ms); Content length: 225 bytes (225 B)
 
 6.4 Forskelle mellem almindelige enhedstests og tests udført i denne opgave
 Testmiljø:
@@ -387,7 +127,7 @@ Testmiljø:
 
 Testtyper:
     Jeg har inkluderet en integrationstest-klasse og en enhedstest-klasse i mit projekt.
-    I min enhedstest-klasse tester jeg på CRUD-metoderne i BicycleDAO-klassen. Her fokuserer jeg på at validere logikken.
+    I min enhedstest-klasse tester jeg på CRUD-metoderne i GuideDAO-klassen. Her fokuserer jeg på at validere logikken.
     Jeg kunne bruge mocks og stubs til at simulere eksterne afhængigheder men pga. tidsmangel og for at
     sikre, at metoderne fungerer korrekt, har jeg valgt at teste direkte med en testdatabase og testdata.
 
@@ -419,7 +159,7 @@ Testdækning:
     brugerhistorier og systeminteraktioner, hvilket kan hjælpe med at afsløre problemer, der ikke ville blive fanget i
     isolerede enhedstests.
 
-7.1 Formålet med Rest Assured
+Formålet med Rest Assured
 
 Rest Assured er et Java-bibliotek, der gør det nemt at teste RESTful webtjenester ved at levere en simpel og intuitiv
 syntaks til at formulere HTTP-anmodninger og validere svar. Jeg ønsker at teste endpoints på denne måde, fordi det giver
@@ -427,14 +167,14 @@ mig mulighed for at verificere, at API'et fungerer som forventet, og at det opfy
 specifikationer. Ved at automatisere tests af mine API-endpoints kan jeg også sikre, at ændringer i koden ikke bryder
 eksisterende funktionalitet, hvilket er vigtigt for at opretholde pålideligheden af applikationen.
 
-7.2 Opsætning af databasen til tests
+Opsætning af databasen til tests
 
 Til opsætning af databasen til tests bruger jeg en dedikeret testdatabase, hvor jeg kan oprette, ændre og slette data
 uden at påvirke produktionsdataene. I testmiljøet bruger jeg en en separat instans af vores produktionsdatabase for at
 sikre, at tests kører i et isoleret miljø. Før hver test rydder jeg op i databasen ved at slette eksisterende data og
 indlæse nødvendige testdata for at sikre, at hver test kører i et konsistent og kontrolleret miljø.
 
-7.3 Forskelle mellem testing af REST endpoints og enhedstests 
+Forskelle mellem testing af REST endpoints og enhedstests 
 
 Test af RESTful endpoints adskiller sig fra enhedstests ved, at de fokuserer på at validere, hvordan hele systemet
 interagerer gennem API'et, snarere end at teste individuelle enheder eller metoder isoleret set. REST endpoint-tests
@@ -443,6 +183,10 @@ inkludere at validere HTTP-statuskoder, svardata og hvordan systemet håndterer 
 er mine enhedstest primært fokuseret på at verificere den interne logik af individuelle metoder eller klasser, uden
 at tage hensyn til den samlede applikations funktionalitet.
 
+
+## Afslutningsvis
+Jeg vidste godt at nerver og stress ville spille en stor rolle i det projekt. Jeg ér ikke nogen hurtig koder på nuværende
+tidspunkt og kan ikke arbejde under tidspres desværre. Jeg har dog gjort mit bedste.
 
 
 

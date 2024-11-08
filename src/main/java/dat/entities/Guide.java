@@ -1,5 +1,6 @@
 package dat.entities;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import dat.dtos.GuideDTO;
 import jakarta.persistence.*;
@@ -38,8 +39,8 @@ public class Guide {
     @Column(name = "yearsOfExperience", nullable = false)
     private int yearsOfExperience;
 
-    @OneToMany(mappedBy = "guide", fetch = FetchType.EAGER, cascade = CascadeType.ALL, orphanRemoval = true)
-    @JsonManagedReference  // Ejer af relationen
+    @OneToMany(mappedBy = "guide", fetch = FetchType.EAGER)
+    @JsonManagedReference
     private Set<Trip> trips = new HashSet<>();
 
     public Guide(String firstname, String lastname, String email, int phone, int yearsOfExperience) {
