@@ -2,6 +2,8 @@ package dat.daos.impl;
 
 import dat.config.HibernateConfig;
 import dat.dtos.GuideDTO;
+import dat.dtos.NewGuideDTO;
+import dat.dtos.NewTripDTO;
 import dat.dtos.TripDTO;
 import dat.entities.*;
 import jakarta.persistence.EntityManagerFactory;
@@ -110,16 +112,16 @@ class GuideDAOTest {
 
     @AfterEach
     public void cleanup(){
-        List<GuideDTO> allGuides = guideDAO.getAll();
-        for (GuideDTO guideDTO : allGuides) {
+        List<NewGuideDTO> allGuides = guideDAO.getAll();
+        for (NewGuideDTO guideDTO : allGuides) {
             try {
                 guideDAO.delete(guideDTO.getId());
             } catch (Exception e) {
                 System.err.println("Could not delete guideDTO with ID "+ guideDTO.getId() + ": " + e.getMessage());
             }
         }
-        List<TripDTO> allTrips = tripDAO.getAll();
-        for (TripDTO tripDTO : allTrips) {
+        List<NewTripDTO> allTrips = tripDAO.getAll();
+        for (NewTripDTO tripDTO : allTrips) {
             try {
                 tripDAO.delete(Math.toIntExact(tripDTO.getId()));
             } catch (Exception e) {
@@ -147,9 +149,9 @@ class GuideDAOTest {
 
     @Test
     void getById() {
-        GuideDTO guideDTO = guideDAO.getById(Math.toIntExact(guideDTO1.getId()));
-        Assertions.assertNotNull(guideDTO);
-        Assertions.assertEquals(guideDTO1.getLastname(), guideDTO.getLastname());
+        NewGuideDTO newGuideDTO = guideDAO.getById(Math.toIntExact(guideDTO1.getId()));
+        Assertions.assertNotNull(newGuideDTO);
+        Assertions.assertEquals(guideDTO1.getLastname(), newGuideDTO.getLastname());
     }
 
     @Test
@@ -177,7 +179,7 @@ class GuideDAOTest {
     @Test
     void delete() {
         guideDAO.delete(Math.toIntExact(guideDTO1.getId()));
-        GuideDTO guideDTO = guideDAO.getById(Math.toIntExact(guideDTO1.getId()));
-        Assertions.assertNull(guideDTO);
+        NewGuideDTO newGuideDTO = guideDAO.getById(Math.toIntExact(guideDTO1.getId()));
+        Assertions.assertNull(newGuideDTO);
     }
 }

@@ -2,6 +2,8 @@ package dat.daos.impl;
 
 import dat.daos.IDAO;
 import dat.dtos.GuideDTO;
+import dat.dtos.NewGuideDTO;
+import dat.dtos.TripDTO;
 import dat.entities.*;
 import dat.exceptions.ApiException;
 import dat.exceptions.JpaException;
@@ -11,7 +13,10 @@ import jakarta.persistence.TypedQuery;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 public class GuideDAO implements IDAO<GuideDTO> {
 
@@ -50,21 +55,39 @@ public class GuideDAO implements IDAO<GuideDTO> {
         }
     }
 
-    public GuideDTO getById(int id) {
+    public NewGuideDTO getById(int id) {
         try (EntityManager em = emf.createEntityManager()) {
             Guide guide = em.find(Guide.class, id);
-            return guide != null ? new GuideDTO(guide) : null;
+            if (guide == null) {
+                return null;
+            }
+
+            Set<TripDTO> tripDTOs = new HashSet<>();
+            for (Trip trip : guide.getTrips()) {
+                tripDTOs.add(new TripDTO(trip.getId(), trip.getStarttime(), trip.getEndtime(), trip.getLongitude(), trip.getLatitude(), trip.getName(), trip.getPrice(), trip.getCategoryType()));
+            }
+
+            return new NewGuideDTO(guide.getId(), guide.getFirstname(), guide.getLastname(), guide.getEmail(), guide.getPhone(), guide.getYearsOfExperience(), tripDTOs);
         } catch (Exception e) {
             logger.error("Error fetching guide by ID: {}", id, e);
             throw new JpaException("Error occurred while fetching guide by ID: " + id, e);
         }
     }
 
-    public List<GuideDTO> getAll() {
+    public List<NewGuideDTO> getAll() {
         try (EntityManager em = emf.createEntityManager()) {
-            TypedQuery<GuideDTO> query = em.createQuery("SELECT new dat.dtos.GuideDTO(r) FROM Guide r", GuideDTO.class);
-            List<GuideDTO> results = query.getResultList();
-            return results;
+            TypedQuery<Guide> query = em.createQuery("SELECT g FROM Guide g", Guide.class);
+            List<Guide> guides = query.getResultList();
+            List<NewGuideDTO> newGuideDTOS = new ArrayList<>();
+            for (Guide guide : guides) {
+                Set<TripDTO> tripDTOs = new HashSet<>();
+                for (Trip trip : guide.getTrips()) {
+                    tripDTOs.add(new TripDTO(trip.getId(), trip.getStarttime(), trip.getEndtime(), trip.getLongitude(), trip.getLatitude(), trip.getName(), trip.getPrice(), trip.getCategoryType()));
+                }
+                newGuideDTOS.add(new NewGuideDTO(guide.getId(), guide.getFirstname(), guide.getLastname(), guide.getEmail(), guide.getPhone(), guide.getYearsOfExperience(), tripDTOs));
+            }
+
+            return newGuideDTOS;
         } catch (Exception e) {
             logger.error("Error fetching all guides", e);
             throw new JpaException("An error occured while fetching all guides", e);
@@ -79,7 +102,7 @@ public class GuideDAO implements IDAO<GuideDTO> {
 
             if (guide != null && trip != null) {
                 guide.addTrip(trip);
-                trip.add(guide);
+                trip.setGuide(guide);
                 em.merge(guide);
                 em.merge(trip);
                 em.getTransaction().commit();
@@ -94,13 +117,13 @@ public class GuideDAO implements IDAO<GuideDTO> {
         }
     }
 
+    @Override
     public GuideDTO update(int id, GuideDTO guideDTO) {
         try (EntityManager em = emf.createEntityManager()) {
             em.getTransaction().begin();
             Guide guide = em.find(Guide.class, id);
-
             if (guide == null) {
-                throw new ApiException(404, "Guide not found");
+                throw new dat.security.exceptions.ApiException(404, "Doctor not found");
             }
 
             if (guideDTO.getFirstname() != null) {
@@ -118,17 +141,7 @@ public class GuideDAO implements IDAO<GuideDTO> {
             if (guideDTO.getYearsOfExperience() != 0) {
                 guide.setYearsOfExperience(guideDTO.getYearsOfExperience());
             }
-            if (guideDTO.getTrips() != null) {
-                guide.getTrips().clear();
-                guideDTO.getTrips().forEach(tripDTO -> {
-                    Trip trip = em.find(Trip.class, tripDTO.getId());
-                    if (trip != null) {
-                        guide.addTrip(trip);
-                    }
-                });
-            }
 
-            // Merge opdateringerne og commit transaktionen
             Guide mergedGuide = em.merge(guide);
             em.getTransaction().commit();
             return new GuideDTO(mergedGuide);

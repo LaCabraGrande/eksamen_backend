@@ -40,6 +40,7 @@ public class Guide {
     private int yearsOfExperience;
 
     @OneToMany(mappedBy = "guide", fetch = FetchType.EAGER)
+    //@JsonIgnore
     @JsonManagedReference
     private Set<Trip> trips = new HashSet<>();
 
@@ -67,9 +68,6 @@ public class Guide {
         this.email = guideDTO.getEmail();
         this.phone = guideDTO.getPhone();
         this.yearsOfExperience = guideDTO.getYearsOfExperience();
-        if (guideDTO.getTrips() != null) {
-            guideDTO.getTrips().forEach(tripDTO -> trips.add(new Trip(tripDTO.toDTO())));
-        }
     }
 
     public void setTrips(Set<Trip> trips) {

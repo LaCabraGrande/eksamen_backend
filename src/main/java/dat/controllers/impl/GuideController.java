@@ -6,16 +6,15 @@ import dat.config.HibernateConfig;
 import dat.controllers.IController;
 import dat.daos.impl.GuideDAO;
 import dat.dtos.GuideDTO;
+import dat.dtos.NewGuideDTO;
 import dat.entities.Guide;
 import io.javalin.http.Context;
 import io.javalin.http.NotFoundResponse;
 import jakarta.persistence.EntityManagerFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.time.format.DateTimeParseException;
 import java.util.List;
 import java.util.Map;
 import static dat.config.Populate.populateDatabase;
@@ -56,9 +55,10 @@ public class GuideController implements IController<GuideDTO> {
     public void getById(Context ctx) {
         try {
             int id = Integer.parseInt(ctx.pathParam("id"));
-            GuideDTO guideDTO = guideDAO.getById(id);
-            if (guideDTO != null) {
-                ctx.json(guideDTO);  // Sends the bicycleDTO as JSON
+            NewGuideDTO newGuideDTO = guideDAO.getById(id);
+            if (newGuideDTO != null) {
+                ctx.res().setStatus(200);
+                ctx.json(newGuideDTO);  // Sends the bicycleDTO as JSON
             } else {
                 throw new NotFoundResponse("Guide with ID "+ id + " not found");  // Exception is thrown
             }
@@ -89,8 +89,8 @@ public class GuideController implements IController<GuideDTO> {
 
     public void getAll(Context ctx) {
         try {
-            List<GuideDTO> guideDTOS = guideDAO.getAll();
-            ctx.json(guideDTOS);
+            List<NewGuideDTO> newGuideDTOS = guideDAO.getAll();
+            ctx.json(newGuideDTOS);
         } catch (NotFoundResponse e) {
             logger.error("Guide not found", e);
             ctx.status(404).json(Map.of(

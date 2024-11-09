@@ -1,9 +1,7 @@
+// Security: JSON Web Token
+
 ### Her tester vi et simpelt endpoint
 GET http://localhost:7070/api/auth/test/
-
-### Her fylder vi databasen med data
-GET http://localhost:7070/api/guides/populate
-Content-Type: application/json
 
 ### Her opretter vi en bruger med en user rolle
 POST http://localhost:7070/api/auth/register/
@@ -59,12 +57,20 @@ Authorization: Bearer {{jwt_token}}
 Accept: application/json
 Authorization: Bearer {{jwt_token}}
 
-### Her henter vi alle guides
+
+
+// Guides API
+
+### Her fylder vi databasen med data
+GET http://localhost:7070/api/guides/populate
+Content-Type: application/json
+
+### Her henter vi alle guides med evt. trips
 GET http://localhost:7070/api/guides
 Accept: application/json
 
-### Her henter vi en guide ud fra id på guide
-GET http://localhost:7070/api/guides/1
+### Her henter vi en guide ud fra id på guide og hans evt. trips
+GET http://localhost:7070/api/guides/5
 Accept: application/json
 
 ### Her opretter vi en guide
@@ -81,7 +87,7 @@ Authorization: Bearer {{jwt_token}}
 }
 
 ### Her opdaterer vi en guide ud fra id på guide
-PUT http://localhost:7070/api/guides/4
+PUT http://localhost:7070/api/guides/5
 Content-Type: application/json
 Authorization: Bearer {{jwt_token}}
 
@@ -97,16 +103,16 @@ Authorization: Bearer {{jwt_token}}
 DELETE http://localhost:7070/api/guides/3
 Authorization: Bearer {{jwt_token}}
 
-// Appointment API
+// Trips API
 
-### Her henter vi alle trips
+### Her henter vi alle trips med evt. guides
 GET http://localhost:7070/api/trips
 
 ### Her henter vi en trip ud fra id
-GET http://localhost:7070/api/trips/1
+GET http://localhost:7070/api/trips/13
 
-### Her tilføjer vi en trip til en guide
-POST http://localhost:7070/api/trips/guide/2
+### Her opretter jeg en trip
+POST http://localhost:7070/api/trips/
 Content-Type: application/json
 Authorization: Bearer {{jwt_token}}
 
@@ -120,8 +126,18 @@ Authorization: Bearer {{jwt_token}}
   "categoryType": "FOREST"
 }
 
+### Her knytter jeg en guide til en trip
+PUT http://localhost:7070/api/trips/13/guides/5
+Authorization: Bearer {{jwt_token}}
+
+{
+"guideId": 5
+"tripId": 13
+}
+
+
 ### Her opdaterer vi en trip ud fra id
-PUT http://localhost:7070/api/trips/12
+PUT http://localhost:7070/api/trips/13
 Content-Type: application/json
 Authorization: Bearer {{jwt_token}}
 
@@ -131,13 +147,38 @@ Authorization: Bearer {{jwt_token}}
   "longitude": "12.345678",
   "latitude": "56.789012",
   "name": "Trip to the beach",
-  "price": 100,
+  "price": 300,
   "categoryType": "BEACH"
 }
 
 ### Her sletter vi en trip ud fra id
 DELETE http://localhost:7070/api/trips/13
 Authorization: Bearer {{jwt_token}}
+
+
+### Her henter jeg alle trips med en bestemt categoryType
+GET http://localhost:7070/api/trips/category/BEACH
+
+{
+  "category": "BEACH"
+}
+
+### Her henter jeg alle trips med en bestemt guide
+GET http://localhost:7070/api/trips/guide/1
+
+{
+  "guideId": 5
+}
+
+### Her sletter jeg en trip ud fra id
+DELETE http://localhost:7070/api/trips/13
+Authorization: Bearer {{jwt_token}}
+
+// Packing List Items API
+
+### Her henter vi packingList Items for en trip med categoryType SEA
+GET http://localhost:7070/api/trips/packing-list/SEA
+
 
 
 

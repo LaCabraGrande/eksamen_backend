@@ -2,11 +2,9 @@ package dat.dtos;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import dat.entities.Trip;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
 import lombok.*;
-
 import java.time.LocalTime;
+import java.util.Objects;
 
 @Getter
 @Setter
@@ -48,23 +46,23 @@ public class TripDTO {
         this.categoryType = trip.getCategoryType();
     }
 
-    public Trip toEntity() {
-        return new Trip(this);
-    }
-
     @Override
     public boolean equals(Object o) {
-        if (this == o)
-            return true;
-        if (o == null || getClass() != o.getClass())
-            return false;
-
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
         TripDTO tripDTO = (TripDTO) o;
-        return getId() == (tripDTO.getId()) && getStarttime().equals(tripDTO.getStarttime()) && getEndtime().equals(tripDTO.getEndtime()) && getLongitude().equals(tripDTO.getLongitude()) && getLatitude().equals(tripDTO.getLatitude()) && getName().equals(tripDTO.getName()) && getPrice() == tripDTO.getPrice() && getCategoryType().equals(tripDTO.getCategoryType());
+        return Objects.equals(id, tripDTO.id) &&
+                Objects.equals(name, tripDTO.name) &&
+                Objects.equals(price, tripDTO.price) &&
+                Objects.equals(starttime, tripDTO.starttime) &&
+                Objects.equals(endtime, tripDTO.endtime) &&
+                Objects.equals(longitude, tripDTO.longitude) &&
+                Objects.equals(latitude, tripDTO.latitude) &&
+                Objects.equals(getCategoryType(), tripDTO.getCategoryType());
     }
 
     @Override
     public int hashCode() {
-        return 0;
+        return Objects.hash(id, name, price, starttime, endtime, longitude, latitude, categoryType);
     }
 }

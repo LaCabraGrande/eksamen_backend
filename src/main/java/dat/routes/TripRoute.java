@@ -13,9 +13,12 @@ public class TripRoute {
         return () -> {
             get("/", tripController::getAll, Role.ANYONE);
             get("/{id}", tripController::getById, Role.ANYONE);
-            post("/guides/{id}", tripController::create, Role.ADMIN);
+            get("/category/{category}", tripController::getTripsByCategory, Role.ANYONE);
+            get("/guide/{guideId}", tripController::getTripsByGuide, Role.ANYONE);
+            get("/packing-list/{category}", tripController::getPackingListByCategory, Role.ANYONE);
             post("/", tripController::create, Role.ADMIN);
             put("/{id}", tripController::update, Role.ADMIN);
+            put("/{tripId}/guides/{guideId}", tripController::addGuideToTrip, Role.ADMIN);
             delete("/{id}", tripController::delete, Role.ADMIN);
         };
     }

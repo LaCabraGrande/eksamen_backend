@@ -5,7 +5,6 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import jakarta.persistence.*;
 import lombok.*;
 import dat.dtos.TripDTO;
-
 import java.time.LocalTime;
 
 @Setter
@@ -46,9 +45,9 @@ public class Trip {
     @Column(name = "category", nullable = false)
     private CategoryType categoryType;
 
-    @ManyToOne(optional = false) // Lægen kan ikke være null
-    @JoinColumn(name = "guide_id", nullable = false) // Lægen skal altid være tilknyttet
-    @JsonBackReference // Ignorerer doctor i JSON-serialisering for at undgå cirkulære referencer
+    @ManyToOne(optional = true)
+    @JoinColumn(name = "guide_id", nullable = true)
+    @JsonBackReference
     private Guide guide;
 
     public Trip(int id, LocalTime starttime, LocalTime endtime, String longitude, String latitude, String name, int price, CategoryType categoryType) {
@@ -73,7 +72,6 @@ public class Trip {
     }
 
     public Trip(TripDTO tripDTO) {
-        this.id = tripDTO.getId();
         this.starttime = tripDTO.getStarttime();
         this.endtime = tripDTO.getEndtime();
         this.longitude = tripDTO.getLongitude();
@@ -83,13 +81,8 @@ public class Trip {
         this.categoryType = tripDTO.getCategoryType();
     }
 
-    public TripDTO toDTO() {
-        return new TripDTO(this);
-    }
 
-    public void add(Guide guide) {
-        this.guide = guide; // Metode til at tilknytte en læge til aftalen
-    }
+
     public enum CategoryType {
         BEACH, CITY, FOREST, LAKE, SEA, SNOW
     }

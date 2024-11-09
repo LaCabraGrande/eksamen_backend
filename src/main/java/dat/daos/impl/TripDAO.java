@@ -1,21 +1,30 @@
 package dat.daos.impl;
 
 import dat.daos.IDAO;
+import dat.daos.ITripGuideDAO;
 import dat.dtos.GuideDTO;
+import dat.dtos.NewGuideDTO;
+import dat.dtos.NewTripDTO;
 import dat.dtos.TripDTO;
 import dat.entities.Guide;
 import dat.entities.Trip;
 import dat.exceptions.JpaException;
+import dat.security.exceptions.ApiException;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityManagerFactory;
 import jakarta.persistence.TypedQuery;
 import lombok.NoArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @NoArgsConstructor(access = lombok.AccessLevel.PRIVATE)
-public class TripDAO implements IDAO<TripDTO> {
+public class TripDAO implements IDAO<TripDTO>, ITripGuideDAO<TripDTO> {
 
     private static final Logger logger = LoggerFactory.getLogger(TripDAO.class);
     private static TripDAO instance;
@@ -29,40 +38,68 @@ public class TripDAO implements IDAO<TripDTO> {
         return instance;
     }
 
-    @Override
-    public TripDTO getById(int id) {
+    // Get Trip by ID (henter en trip baseret på ID)
+    public NewTripDTO getById(int id) {
         try (EntityManager em = emf.createEntityManager()) {
             Trip trip = em.find(Trip.class, id);
-            return trip != null ? new TripDTO(trip) : null;
+
+            if (trip == null) {
+                return null;
+            }
+
+            // Konverter Trip til TripDTOWithGuide og tilføj den tilknyttede guide
+            GuideDTO guideDTO = null;
+            if (trip.getGuide() != null) {
+                guideDTO = new GuideDTO(trip.getGuide().getId(), trip.getGuide().getFirstname(), trip.getGuide().getLastname(), trip.getGuide().getEmail(), trip.getGuide().getPhone(), trip.getGuide().getYearsOfExperience());
+            }
+
+            return new NewTripDTO(trip.getId(), trip.getStarttime(), trip.getEndtime(), trip.getLongitude(), trip.getLatitude(), trip.getName(), trip.getPrice(), trip.getCategoryType(), guideDTO);
         } catch (Exception e) {
             logger.error("Error fetching trip", e);
             throw new JpaException("Error occured fetching trip by ID: " + id, e);
         }
     }
 
-    @Override
-    public List<TripDTO> getAll() {
+    public List<NewTripDTO> getAll() {
         try (EntityManager em = emf.createEntityManager()) {
-            TypedQuery<TripDTO> query = em.createQuery("SELECT new dat.dtos.TripDTO(p) FROM Trip p", TripDTO.class);
-            return query.getResultList();
+            TypedQuery<Trip> query = em.createQuery("SELECT t FROM Trip t", Trip.class);
+            List<Trip> trips = query.getResultList();
+            List<NewTripDTO> newTripDTOS = new ArrayList<>();
+            for (Trip trip : trips) {
+                GuideDTO guideDTO = null;
+                if (trip.getGuide() != null) {
+                    guideDTO = new GuideDTO(trip.getGuide().getId(), trip.getGuide().getFirstname(), trip.getGuide().getLastname(), trip.getGuide().getEmail(), trip.getGuide().getPhone(), trip.getGuide().getYearsOfExperience());
+                }
+                newTripDTOS.add(new NewTripDTO(trip.getId(), trip.getStarttime(), trip.getEndtime(), trip.getLongitude(), trip.getLatitude(), trip.getName(), trip.getPrice(), trip.getCategoryType(), guideDTO));
+            }
+            return newTripDTOS;
         } catch (Exception e) {
             logger.error("Error fetching trips", e);
             throw new JpaException("Error occured fetching trips", e);
         }
     }
 
-    public TripDTO addTripToGuide(int guideId, TripDTO tripDTO) {
+    public NewTripDTO addGuideToTrip(int tripId, int guideId) {
         try (EntityManager em = emf.createEntityManager()) {
             em.getTransaction().begin();
+
             Guide guide = em.find(Guide.class, guideId);
-            Trip trip = new Trip(tripDTO);
-            guide.addTrip(trip);
-            em.persist(trip);
-            em.getTransaction().commit();
-            return new TripDTO(trip);
+            Trip trip = em.find(Trip.class, tripId);
+
+            if (guide != null && trip != null) {
+                guide.addTrip(trip);
+                trip.setGuide(guide);
+                em.merge(guide);
+                em.merge(trip);
+                em.getTransaction().commit();
+                return new NewTripDTO(trip.getId(), trip.getStarttime(), trip.getEndtime(), trip.getLongitude(), trip.getLatitude(), trip.getName(), trip.getPrice(), trip.getCategoryType(), new GuideDTO(guide));
+            } else {
+                em.getTransaction().rollback();
+                throw new ApiException(404, "Trip or Guide not found");
+            }
         } catch (Exception e) {
-            logger.error("Error adding trip with ID: {}", tripDTO.getId(), e);
-            throw new JpaException("Error adding appointment with ID: " + tripDTO.getId(), e);
+            logger.error("Error adding guide with ID: {}", guideId, e);
+            throw new JpaException("Error adding guide with ID: " + guideId, e);
         }
     }
 
@@ -115,22 +152,54 @@ public class TripDAO implements IDAO<TripDTO> {
         return null;
     }
 
-    public GuideDTO create(int guideId, int tripId) {
+    public TripDTO create(TripDTO tripDTO) {
         try (EntityManager em = emf.createEntityManager()) {
-            Guide guide = em.find(Guide.class, guideId);
-            Trip trip = em.find(Trip.class, tripId);
-            if (guide != null && trip != null) {
-                em.getTransaction().begin();
-                guide.addTrip(trip);
-                em.merge(guide);
-                em.getTransaction().commit();
-                return new GuideDTO(guide);
-            }
-            return null;
-        }
-        catch (Exception e) {
-            logger.error("Error adding trip to guide", e);
-            throw new JpaException("Error adding trip to guide", e);
+            em.getTransaction().begin();
+            Trip trip = new Trip(tripDTO);
+            em.persist(trip);
+            em.getTransaction().commit();
+            return new TripDTO(trip);
+        } catch (Exception e) {
+            logger.error("Error creating trip", e);
+            throw new JpaException("Error creating trip", e);
         }
     }
+
+    public List<TripDTO> getTripsByCategory(Trip.CategoryType categoryType) {
+        try (EntityManager em = emf.createEntityManager()) {
+
+            TypedQuery<TripDTO> query = em.createQuery(
+                    "SELECT new dat.dtos.TripDTO(p) FROM Trip p WHERE p.categoryType = :category",
+                    TripDTO.class
+            );
+
+            query.setParameter("category", categoryType); // Brug `categoryType` som enum
+            return query.getResultList();
+        } catch (IllegalArgumentException e) {
+            logger.error("Invalid category provided: {}", categoryType, e);
+            throw new JpaException("Invalid category provided: " + categoryType, e);
+        } catch (Exception e) {
+            logger.error("Error fetching trips by category", e);
+            throw new JpaException("Error occurred fetching trips by category", e);
+        }
+    }
+
+    @Override
+    public Set<TripDTO> getTripsByGuide(int guideId) {
+        try(EntityManager em = emf.createEntityManager()) {
+            Guide guide = em.find(Guide.class, guideId);
+            if (guide != null) {
+                return guide.getTrips().stream()
+                        .map(TripDTO::new)
+                        .collect(Collectors.toSet());
+            }
+            return Set.of();
+        } catch (Exception e) {
+            logger.error("Error fetching trips by guide", e);
+            throw new JpaException("Error occurred fetching trips by guide", e);
+        }
+    }
+
+
+
 }

@@ -1,21 +1,10 @@
 package dat.dtos;
 
-import com.fasterxml.jackson.annotation.JsonFormat;
-import com.fasterxml.jackson.annotation.JsonManagedReference;
 import dat.entities.Guide;
-import dat.entities.Trip;
-import jakarta.persistence.CascadeType;
-import jakarta.persistence.Column;
-import jakarta.persistence.FetchType;
-import jakarta.persistence.OneToMany;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.util.HashSet;
 import java.util.Objects;
-import java.util.Set;
 
 @Getter
 @Setter
@@ -28,9 +17,7 @@ public class GuideDTO {
     private String email;
     private int phone;
     private int yearsOfExperience;
-    private Set<Trip> trips = new HashSet<>();
 
-    // Constructor med alle felter
     public GuideDTO(int id, String firstname, String lastname, String email, int phone, int yearsOfExperience) {
         this.id = id;
         this.firstname = firstname;
@@ -47,9 +34,7 @@ public class GuideDTO {
         this.email = guide.getEmail();
         this.phone = guide.getPhone();
         this.yearsOfExperience = guide.getYearsOfExperience();
-        if (guide.getTrips() != null) {
-            guide.getTrips().forEach(trip -> trips.add(new TripDTO(trip).toEntity()));
-        }
+
     }
 
     public GuideDTO(String firstname, String lastname, String email, int phone, int yearsOfExperience) {
@@ -65,19 +50,21 @@ public class GuideDTO {
     }
 
     @Override
-    public boolean equals(Object o)
-    {
+    public boolean equals(Object o) {
         if (this == o) return true;
-        if (!(o instanceof GuideDTO guideDto)) return false;
-
-        return getId() == guideDto.getId();
+        if (o == null || getClass() != o.getClass()) return false;
+        GuideDTO guideDTO = (GuideDTO) o;
+        return getId() == guideDTO.getId() &&
+                getPhone() == guideDTO.getPhone() &&
+                getYearsOfExperience() == guideDTO.getYearsOfExperience() &&
+                Objects.equals(getFirstname(), guideDTO.getFirstname()) &&
+                Objects.equals(getLastname(), guideDTO.getLastname()) &&
+                Objects.equals(getEmail(), guideDTO.getEmail());
     }
 
     @Override
-    public int hashCode()
-    {
-        return Objects.hash(getId());
+    public int hashCode() {
+        return Objects.hash(getId(), getFirstname(), getLastname(), getEmail(), getPhone(), getYearsOfExperience());
     }
-
 }
 
