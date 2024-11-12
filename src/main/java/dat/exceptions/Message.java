@@ -1,4 +1,3 @@
 package dat.exceptions;
 
-public record Message(int status, String message) {
-}
+public record Message(int status, String message, String timestamp) {}

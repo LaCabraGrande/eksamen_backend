@@ -1,14 +1,20 @@
 package dat.dtos;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import dat.entities.Guide;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+
+import java.util.HashSet;
 import java.util.Objects;
+import java.util.Set;
 
 @Getter
 @Setter
 @NoArgsConstructor
+@AllArgsConstructor
 public class GuideDTO {
 
     private int id;
@@ -17,6 +23,7 @@ public class GuideDTO {
     private String email;
     private int phone;
     private int yearsOfExperience;
+    private Set<TripDTO> trips = new HashSet<>();
 
     public GuideDTO(int id, String firstname, String lastname, String email, int phone, int yearsOfExperience) {
         this.id = id;
@@ -34,37 +41,13 @@ public class GuideDTO {
         this.email = guide.getEmail();
         this.phone = guide.getPhone();
         this.yearsOfExperience = guide.getYearsOfExperience();
-
+        if (guide.getTrips() != null) {
+            guide.getTrips().forEach(trip -> this.trips.add(new TripDTO(trip)));
+        }
     }
 
-    public GuideDTO(String firstname, String lastname, String email, int phone, int yearsOfExperience) {
-        this.firstname = firstname;
-        this.lastname = lastname;
-        this.email = email;
-        this.phone = phone;
-        this.yearsOfExperience = yearsOfExperience;
-    }
 
-    public Guide toEntity() {
-        return new Guide(this);
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        GuideDTO guideDTO = (GuideDTO) o;
-        return getId() == guideDTO.getId() &&
-                getPhone() == guideDTO.getPhone() &&
-                getYearsOfExperience() == guideDTO.getYearsOfExperience() &&
-                Objects.equals(getFirstname(), guideDTO.getFirstname()) &&
-                Objects.equals(getLastname(), guideDTO.getLastname()) &&
-                Objects.equals(getEmail(), guideDTO.getEmail());
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(getId(), getFirstname(), getLastname(), getEmail(), getPhone(), getYearsOfExperience());
-    }
 }
+
+
 

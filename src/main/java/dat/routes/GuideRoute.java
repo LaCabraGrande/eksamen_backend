@@ -15,8 +15,6 @@ public class GuideRoute {
             get("/", guideController::getAll, Role.ANYONE);
             get("/{id}", guideController::getById, Role.ANYONE);
             post("/", guideController::create, Role.ADMIN);
-            post("/{guideId}/trips/{tripId}", guideController::addTripToGuide, Role.ADMIN);
-            post("/guides/{guideId}/trips/{tripId}", guideController::addTripToGuide, Role.ADMIN);
             put("/{id}", guideController::update, Role.ADMIN);
             delete("/{id}", guideController::delete, Role.ADMIN);
         };

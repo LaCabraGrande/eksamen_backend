@@ -1,64 +1,46 @@
 package dat.config;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import dat.controllers.impl.ExceptionController;
+import dat.exceptions.ApiException;
 import dat.routes.Routes;
 import dat.security.controllers.AccessController;
-import dat.security.controllers.SecurityController;
 import dat.security.enums.Role;
-import dat.security.exceptions.ApiException;
 import dat.security.routes.SecurityRoutes;
-import dat.utils.Utils;
 import io.javalin.Javalin;
 import io.javalin.config.JavalinConfig;
 import io.javalin.http.Context;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.NoArgsConstructor;
+import dat.utils.ApiProps;
 
+@NoArgsConstructor(access = lombok.AccessLevel.PRIVATE)
 public class ApplicationConfig {
 
-    private static Routes routes = new Routes();
-    private static ObjectMapper jsonMapper = new Utils().getObjectMapper();
-    private static SecurityController securityController = SecurityController.getInstance();
-    private static AccessController accessController = new AccessController();
-    private static Logger logger = LoggerFactory.getLogger(ApplicationConfig.class);
+    private static final Routes routes = new Routes();
+    private static final ExceptionController exceptionController = new ExceptionController();
+    private static final AccessController accessController = new AccessController();
 
-
-    // This method is used to configure the Javalin server
     public static void configuration(JavalinConfig config) {
-        config.showJavalinBanner = false;
+        config.router.contextPath = ApiProps.API_CONTEXT;
         config.bundledPlugins.enableRouteOverview("/routes", Role.ANYONE);
-        config.router.contextPath = "/api"; // base path for all endpoints
+        config.bundledPlugins.enableDevLogging();
         config.router.apiBuilder(routes.getRoutes());
         config.router.apiBuilder(SecurityRoutes.getSecuredRoutes());
         config.router.apiBuilder(SecurityRoutes.getSecurityRoutes());
     }
 
-    public static Javalin startServer(int port) {
+    private static void exceptionContext(Javalin app) {
+        app.exception(ApiException.class, (e, ctx) -> exceptionController.apiExceptionHandler(e, ctx));
+        app.exception(Exception.class, (e, ctx) -> exceptionController.exceptionHandler(e, ctx));
+    }
+
+    public static void startServer() {
         Javalin app = Javalin.create(ApplicationConfig::configuration);
-
+        exceptionContext(app);
         app.beforeMatched(accessController::accessHandler);
-
-        app.beforeMatched(ctx -> accessController.accessHandler(ctx));
-
-        app.exception(Exception.class, ApplicationConfig::generalExceptionHandler);
-        app.exception(ApiException.class, ApplicationConfig::apiExceptionHandler);
-        app.start(port);
-
-        return app;
+        app.start(ApiProps.PORT);
     }
 
     public static void stopServer(Javalin app) {
         app.stop();
-    }
-
-    private static void generalExceptionHandler(Exception e, Context ctx) {
-        logger.error("An exception occurred: {}", e.getMessage());
-        ctx.json(Utils.convertToJsonMessage(ctx, "error", e.getMessage()));
-    }
-
-    public static void apiExceptionHandler(ApiException e, Context ctx) {
-        ctx.status(e.getCode());
-        logger.warn("An API exception occurred: Code: {}, Message: {}", e.getCode(), e.getMessage());
-        ctx.json(Utils.convertToJsonMessage(ctx, "warning", e.getMessage()));
     }
 }

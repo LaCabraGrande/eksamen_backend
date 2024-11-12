@@ -6,24 +6,20 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import dat.config.HibernateConfig;
 import dat.controllers.IController;
 import dat.daos.impl.TripDAO;
-import dat.dtos.GuideDTO;
 import dat.dtos.NewTripDTO;
 import dat.dtos.TripDTO;
 import dat.entities.Trip;
-import dat.exceptions.JpaException;
+import dat.exceptions.ApiException;
 import io.javalin.http.*;
 import io.javalin.validation.ValidationException;
 import jakarta.persistence.EntityManagerFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
 import java.io.IOException;
 import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -40,88 +36,51 @@ public class TripController implements IController<TripDTO> {
         this.tripDAO = TripDAO.getInstance(emf);
     }
 
-    public void getAll(Context ctx) {
-        try {
-            List<NewTripDTO> newTripDTOS = tripDAO.getAll();
-            ctx.json(newTripDTOS);
-        }  catch (NotFoundResponse e) {
-            logger.error("Trip not found", e);
-            ctx.status(404).json(Map.of(
-                    "status", 404,
-                    "message", "Trip not found",
-                    "timestamp", LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"))
-            ));
-        } catch (Exception e) {
-            logger.error("Unknown error occurred", e);
-            ctx.status(500).json(Map.of(
-                    "status", 500,
-                    "message", "Internal server error",
-                    "timestamp", LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"))
-            ));
-        }
-    }
-
+    @Override
     public void getById(Context ctx) {
         try {
             int id = Integer.parseInt(ctx.pathParam("id"));
-            NewTripDTO newTripDTO = tripDAO.getById(id);
-            if (newTripDTO != null) {
+            TripDTO tripDTO = tripDAO.getById(id);
+            if (tripDTO != null) {
                 ctx.res().setStatus(200);
-                ctx.json(newTripDTO, NewTripDTO.class);
+                ctx.json(tripDTO, NewTripDTO.class);
             } else {
-                throw new NotFoundResponse("Trip not found");
+                throw new ApiException(404, "Trip not found with ID: " + id);
             }
         } catch (NumberFormatException e) {
             logger.error("Invalid Trip ID format: {}", ctx.pathParam("id"), e);
-            ctx.status(400).json(Map.of(
-                    "status", 400,
-                    "message", "Invalid trip ID format.",
-                    "timestamp", LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"))
-            ));
-        } catch (NotFoundResponse e) {
-            logger.error("Trip with ID: {}", ctx.pathParam("id") + " not found", e);
-            ctx.status(404).json(Map.of(
-                    "status", 404,
-                    "message", "Trip with ID: " + ctx.pathParam("id") + " not found",
-                    "timestamp", LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"))
-            ));
-        } catch (Exception e) {
-            logger.error("An unknown error occurred while retrieving trip with ID: {}", ctx.pathParam("id"), e);
-            ctx.status(500).json(Map.of(
-                    "status", 500,
-                    "message", "Internal server error: " + e.getMessage(),
-                    "timestamp", LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"))
-            ));
+            throw new ApiException(400, "Invalid ID format. Please provide a numeric ID.");
         }
     }
 
+    @Override
+    public void getAll(Context ctx) {
+        try {
+            List<TripDTO> tripDTOS = tripDAO.getAll();
+            if(tripDTOS.isEmpty()){
+                throw new ApiException(404, "No trips found");
+            } else {
+                ctx.status(200).json(tripDTOS);
+            }
+        } catch (Exception e) {
+            logger.error("An error occurred while retrieving all trips", e);
+            throw new ApiException(500, "Internal server error");
+        }
+    }
+
+    @Override
     public void create(Context ctx) {
         try {
             TripDTO tripDTO = ctx.bodyAsClass(TripDTO.class);
             TripDTO newTripDTO = tripDAO.create(tripDTO);
             ctx.status(201).json(newTripDTO);
-        }  catch (ValidationException e) {
-            logger.error("Validation error: {}", e.getErrors(), e);
-            ctx.status(400).json(createErrorResponse(400, "Validation failed for the provided trip data."));
         } catch (BadRequestResponse e) {
-            logger.error("Invalid request: {}", e.getMessage());
-            ctx.status(400).json(createErrorResponse(400, "The provided request is invalid. " + e.getMessage()));
+            logger.error("Invalid request body", e);
+            throw new ApiException(400, "Invalid request format");
         } catch (Exception e) {
-            logger.error("Internal server error", e);
-            ctx.status(500).json(Map.of(
-                    "status", 500,
-                    "message", "Internal server error: " + e.getMessage(),
-                    "timestamp", LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"))
-            ));
+            logger.error("An error occurred while creating a new trip", e);
+            throw new ApiException(500, "Internal server error");
         }
-    }
-
-    private Map<String, Object> createErrorResponse(int httpstatus, String message) {
-        return Map.of(
-                "status", httpstatus,
-                "message", message,
-                "timestamp", LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"))
-        );
     }
 
     @Override
@@ -134,65 +93,37 @@ public class TripController implements IController<TripDTO> {
                 ctx.res().setStatus(200);
                 ctx.json(updatedTripDTO);
             } else {
-                throw new NotFoundResponse("Trip not found");
+                throw new ApiException(404, "Trip with ID " + id + " not found");
             }
         } catch (NumberFormatException e) {
             logger.error("Invalid Trip ID format: {}", ctx.pathParam("id"), e);
-            ctx.status(400).json(Map.of(
-                    "status", 400,
-                    "message", "Invalid trip ID format.",
-                    "timestamp", LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"))
-            ));
-        } catch (NotFoundResponse e) {
-            logger.error("Trip with ID: {}", ctx.pathParam("id") + " not found", e);
-            ctx.status(404).json(Map.of(
-                    "status", 404,
-                    "message", "Trip with ID: " + ctx.pathParam("id") + " not found",
-                    "timestamp", LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"))
-            ));
+            throw new ApiException(400, "Invalid ID format. Please provide a numeric ID.");
+        } catch (ValidationException e) {
+            logger.error("Invalid request body", e);
+            throw new ApiException(400, "Invalid request format");
         } catch (Exception e) {
-            logger.error("An unknown error occures while updating trip with ID: {}", ctx.pathParam("id"), e);
-            ctx.status(500).json(Map.of(
-                    "status", 500,
-                    "message", "Internal server error: " + e.getMessage(),
-                    "timestamp", LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"))
-            ));
+            logger.error("An error occurred while updating trip", e);
+            throw new ApiException(500, "Internal server error");
         }
     }
 
-    // Her slettes en appointment fra databasen
+    @Override
     public void delete(Context ctx) {
         try {
             int id = Integer.parseInt(ctx.pathParam("id"));
-            TripDTO deletedTripDTO = tripDAO.delete(id);
-            if (deletedTripDTO != null) {
-                String jsonResponse = String.format("{\"Message\": \"Trip deleted\", \"deletedTripDTO\": %s}",
-                        OBJECT_MAPPER.writeValueAsString(deletedTripDTO));
-                ctx.status(200).json(jsonResponse);
+            TripDTO tripDTO = tripDAO.getById(id);
+            if (tripDTO != null) {
+                tripDAO.delete(id);
+                ctx.status(200).json(Map.of("message", "Trip with ID " + id + " deleted"));
             } else {
-                throw new NotFoundResponse("Trip not found");
+                throw new ApiException(404, "Trip with ID " + id + " not found");
             }
         } catch (NumberFormatException e) {
             logger.error("Invalid Trip ID format: {}", ctx.pathParam("id"), e);
-            ctx.status(400).json(Map.of(
-                    "status", 400,
-                    "message", "Invalid trip ID format.",
-                    "timestamp", LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"))
-            ));
-        } catch (NotFoundResponse e) {
-            logger.error("Trip with ID: {}", ctx.pathParam("id") + " not found", e);
-            ctx.status(404).json(Map.of(
-                    "status", 404,
-                    "message", "Trip with ID: " + ctx.pathParam("id") + " not found",
-                    "timestamp", LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"))
-            ));
-        } catch (Throwable e) {
-            logger.error("Internal server error", e);
-            ctx.status(500).json(Map.of(
-                    "status", 500,
-                    "message", "Internal server error: " + e.getMessage(),
-                    "timestamp", LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"))
-            ));
+            throw new ApiException(400, "Invalid ID format. Please provide a numeric ID.");
+        } catch (Exception e) {
+            logger.error("An error occurred while deleting trip", e);
+            throw new ApiException(500, "Internal server error");
         }
     }
 
@@ -200,85 +131,65 @@ public class TripController implements IController<TripDTO> {
         try {
             int tripId = Integer.parseInt(ctx.pathParam("tripId"));
             int guideId = Integer.parseInt(ctx.pathParam("guideId"));
-
-            NewTripDTO newTripDTO = tripDAO.addGuideToTrip(tripId, guideId);
-
-            if (newTripDTO == null) {
-                ctx.status(404).json(createErrorResponse(404, "Either Trip or Guide not found with the given IDs."));
-                return;
-            }
-
-            ctx.status(200).json(newTripDTO);
+            tripDAO.addGuideToTrip(tripId, guideId);
+            ctx.status(200).json("Guide with ID: " + guideId + " added to trip with ID: " + tripId);
         } catch (NumberFormatException e) {
             logger.error("Invalid ID format", e);
-            ctx.status(400).json(createErrorResponse(400, "Invalid ID format."));
+            throw new ApiException(400, "Invalid ID format. Please provide a numeric ID.");
         } catch (Exception e) {
-            logger.error("An unknown error occurred while adding guide to trip", e);
-            ctx.status(500).json(createErrorResponse(500, "Internal server error"));
+            logger.error("An error occurred while adding guide to trip", e);
+            throw new ApiException(500, "Internal server error");
+        }
+    }
+
+    public void getTripsByCategory(Context ctx) {
+        String category = ctx.pathParam("category");
+        Trip.CategoryType categoryType;
+        try {
+            categoryType = Trip.CategoryType.valueOf(category.toUpperCase());
+        } catch (IllegalArgumentException e) {
+           logger.error("Invalid category provided: {}", category);
+            throw new ApiException(400, "Invalid category provided");
+        }
+        try {
+            List<TripDTO> trips = tripDAO.getTripsByCategory(categoryType);
+            if (trips.isEmpty()) {
+               logger.error("No trips found for category: {}", category);
+                throw new ApiException(404, "No trips found for category: " + category);
+            } else {
+                ctx.status(200).json(trips);
+            }
+        } catch (Exception e) {
+            logger.error("An unexpected error occurred for category: {}", category, e);
+            throw new ApiException(500, "Internal server error");
         }
     }
 
     public void getTripsByGuide(Context ctx) {
         try {
             int guideId = Integer.parseInt(ctx.pathParam("guideId"));
-            Set<TripDTO> tripDTOS = tripDAO.getTripsByGuide(guideId);
-
-            if (tripDTOS.isEmpty()) {
-                ctx.status(404).json(createErrorResponse(404, "No trips found for guide with ID: " + guideId));
-            } else {
-                ctx.json(tripDTOS);
+            Set<TripDTO> trips = tripDAO.getTripsByGuide(guideId);
+            if (trips.isEmpty()) {
+                logger.error("No trips found for guide with ID: {}", guideId);
+                throw new ApiException(404, "No trips found for guide with ID: " + guideId);
             }
+            ctx.json(trips);
         } catch (NumberFormatException e) {
             logger.error("Invalid Guide ID format: {}", ctx.pathParam("guideId"), e);
-            ctx.status(400).json(createErrorResponse(400, "Invalid guide ID format."));
-        } catch (Exception e) {
-            logger.error("An error occurred while retrieving trips by guide: {}", ctx.pathParam("guideId"), e);
-            ctx.status(500).json(createErrorResponse(500, "Internal server error"));
+            throw new ApiException(400, "Invalid ID format. Please provide a numeric ID.");
         }
     }
 
-    public void getTripsByCategory(Context ctx) {
+    public void getPackingListItemsByCategory(Context ctx) {
         String category = ctx.pathParam("category");
-
-        // Her validerer jeg først om kategorien findes i min CategoryType enum
-        Trip.CategoryType categoryType;
         try {
-            categoryType = Trip.CategoryType.valueOf(category.toUpperCase());
+            Trip.CategoryType.valueOf(category.toUpperCase());
         } catch (IllegalArgumentException e) {
-            ctx.status(400).json(createErrorResponse(400, "Invalid category provided"));
-            return;
-        }
-
-        try {
-            List<TripDTO> trips = tripDAO.getTripsByCategory(categoryType);
-
-            if (trips.isEmpty()) {
-                ctx.status(404).json(createErrorResponse(404, "No trips found for category: " + category));
-            } else {
-                ctx.json(trips);
-            }
-        } catch (JpaException e) {
-            logger.error("Database error for category: {}", category, e);
-            ctx.status(500).json(createErrorResponse(500, "Database error"));
-        } catch (Exception e) {
-            logger.error("An unexpected error occurred for category: {}", category, e);
-            ctx.status(500).json(createErrorResponse(500, "Internal server error"));
-        }
-    }
-
-
-    public void getPackingListByCategory(Context ctx) {
-        String category = ctx.pathParam("category").toUpperCase();
-        Trip.CategoryType categoryType;
-        try {
-            categoryType = Trip.CategoryType.valueOf(category);
-        } catch (IllegalArgumentException e) {
-            ctx.status(HttpStatus.BAD_REQUEST).result("Invalid category provided");
-            return;
+            logger.error("Invalid category provided: {}", category, e);
+            throw new ApiException(400, "Invalid category provided.");
         }
 
         String url = BASE_URL_FETCHING_PACKING_LIST + category.toLowerCase();
-
         HttpClient client = HttpClient.newHttpClient();
         HttpRequest request = HttpRequest.newBuilder()
                 .uri(URI.create(url))
@@ -290,34 +201,35 @@ public class TripController implements IController<TripDTO> {
             if (response.statusCode() == 200) {
                 ctx.json(OBJECT_MAPPER.readTree(response.body()));
             } else {
-                ctx.status(response.statusCode()).result("Error fetching packing items. Status code: " + response.statusCode());
+                logger.error("Error fetching packing items. Status code: {}", response.statusCode());
+                throw new ApiException(response.statusCode(), "Error fetching packing items.");
             }
         } catch (IOException | InterruptedException e) {
-            ctx.status(HttpStatus.INTERNAL_SERVER_ERROR).result("Error fetching packing list items");
+            logger.error("Error fetching packing list items", e);
+            throw new ApiException(500, "Internal server error while fetching packing list items.");
         }
     }
 
     public JsonNode getPackingList(String category) {
         String url = BASE_URL_FETCHING_PACKING_LIST + category.toLowerCase();
-
         HttpClient client = HttpClient.newHttpClient();
         HttpRequest request = HttpRequest.newBuilder()
                 .uri(URI.create(url))
                 .GET()
                 .build();
-
         try {
             HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+
             if (response.statusCode() == 200) {
-                return OBJECT_MAPPER.readTree(response.body()); // Her returnerer jeg JSON som en JsonNode
-            } else {
-                // Hvis der ikke er nogen pakkeliste, returnerer jeg en  JsonNode med besked om at der ikke er nogen ting at medbringe på den tur
+                return OBJECT_MAPPER.readTree(response.body());
+            } else if (response.statusCode() == 404) {
                 return OBJECT_MAPPER.createObjectNode().put("message", "No packing list items found for category: " + category);
+            } else {
+                throw new ApiException(response.statusCode(), "Error fetching packing list items. Status code: " + response.statusCode());
             }
         } catch (IOException | InterruptedException e) {
-            e.printStackTrace();
-            return null;
+            logger.error("Error fetching packing list items for category: {}", category, e);
+            throw new ApiException(500, "Internal server error while fetching packing list items.");
         }
     }
-
 }

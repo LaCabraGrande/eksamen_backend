@@ -9,6 +9,7 @@ import java.util.Objects;
 @Getter
 @Setter
 @NoArgsConstructor
+@AllArgsConstructor
 @Builder
 public class TripDTO {
 
@@ -22,6 +23,7 @@ public class TripDTO {
     private String name;
     private int price;
     private Trip.CategoryType categoryType;
+    private NewGuideDTO newGuideDTO;
 
 
     public TripDTO(int id, LocalTime starttime, LocalTime endtime, String longitude, String latitude, String name, int price, Trip.CategoryType categoryType) {
@@ -44,6 +46,16 @@ public class TripDTO {
         this.name = trip.getName();
         this.price = trip.getPrice();
         this.categoryType = trip.getCategoryType();
+    }
+
+    public TripDTO(LocalTime starttime, LocalTime endtime, String longitude, String latitude, String name, int price, Trip.CategoryType categoryType) {
+        this.starttime = starttime;
+        this.endtime = endtime;
+        this.longitude = longitude;
+        this.latitude = latitude;
+        this.name = name;
+        this.price = price;
+        this.categoryType = categoryType;
     }
 
     @Override

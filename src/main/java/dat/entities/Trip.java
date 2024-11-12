@@ -47,7 +47,6 @@ public class Trip {
 
     @ManyToOne(optional = true)
     @JoinColumn(name = "guide_id", nullable = true)
-    @JsonBackReference
     private Guide guide;
 
     public Trip(int id, LocalTime starttime, LocalTime endtime, String longitude, String latitude, String name, int price, CategoryType categoryType) {

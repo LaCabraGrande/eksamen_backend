@@ -7,7 +7,7 @@ import java.util.Set;
 
 public interface ITripGuideDAO<T> {
 
-    NewTripDTO addGuideToTrip(int tripId, int guideId);
+    void addGuideToTrip(int tripId, int guideId);
     Set<TripDTO> getTripsByGuide(int guideId);
 
 }

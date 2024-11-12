@@ -1,8 +1,5 @@
 // Security: JSON Web Token
 
-### Her tester vi et simpelt endpoint
-GET http://localhost:7070/api/auth/test/
-
 ### Her opretter vi en bruger med en user rolle
 POST http://localhost:7070/api/auth/register/
 Content-Type: application/json
@@ -24,16 +21,6 @@ POST http://localhost:7070/api/auth/login/
     client.global.set("jwt_token", response.body.token);
     console.log("JWT Token:", client.global.get("jwt_token"));
 %}
-
-### Her henter vi en bruger med en user rolle
-GET http://localhost:7070/api/protected/user_demo/
-Accept: application/json
-Authorization: Bearer {{jwt_token}}
-
-### Her henter vi en bruger med en admin rolle
-GET http://localhost:7070/api/protected/admin_demo/
-Accept: application/json
-Authorization: Bearer {{jwt_token}}
 
 ### Her tilføjer vi en superman rolle til brugeren
 POST http://localhost:7070/api/auth/user/addrole/
@@ -109,7 +96,7 @@ Authorization: Bearer {{jwt_token}}
 GET http://localhost:7070/api/trips
 
 ### Her henter vi en trip ud fra id
-GET http://localhost:7070/api/trips/13
+GET http://localhost:7070/api/trips/2
 
 ### Her opretter jeg en trip
 POST http://localhost:7070/api/trips/
@@ -134,7 +121,6 @@ Authorization: Bearer {{jwt_token}}
 "guideId": 5
 "tripId": 13
 }
-
 
 ### Her opdaterer vi en trip ud fra id
 PUT http://localhost:7070/api/trips/13

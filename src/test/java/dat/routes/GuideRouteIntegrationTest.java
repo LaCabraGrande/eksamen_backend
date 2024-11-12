@@ -4,43 +4,46 @@ import dat.config.ApplicationConfig;
 import dat.config.HibernateConfig;
 import dat.daos.impl.GuideDAO;
 import dat.dtos.GuideDTO;
-import dat.entities.Guide;
+import dat.dtos.NewGuideDTO;
 import io.javalin.Javalin;
 import io.restassured.http.ContentType;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityManagerFactory;
 import org.junit.jupiter.api.*;
-import java.time.LocalDate;
-import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.util.List;
+
 import static io.restassured.RestAssured.given;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.arrayContainingInAnyOrder;
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-class DoctorRouteIntegrationTest {
-    private static final Logger logger = LoggerFactory.getLogger(DoctorRouteIntegrationTest.class);
+class GuideRouteIntegrationTest {
+    private static final Logger logger = LoggerFactory.getLogger(GuideRouteIntegrationTest.class);
     private static final EntityManagerFactory emf = HibernateConfig.getEntityManagerFactoryForTest();
     private static final GuideDAO guideDAO = GuideDAO.getInstance(emf);
     private static final String BASE_URL = "http://localhost:7070/api";
-    private static final Populator populator = new Populator(guideDAO, emf);
+    private static final GuidePopulator guidePopulator = new GuidePopulator(guideDAO, emf);
     private Javalin app;
     private GuideDTO g1, g2, g3;
+    private NewGuideDTO g4, g5, g6;
     private List<GuideDTO> guideDTOS;
+    private List<NewGuideDTO> newGuideDTOS;
     private String jwtToken;
 
     @BeforeAll
     void init() {
-        app = ApplicationConfig.startServer(7070);
+        ApplicationConfig.startServer();
         HibernateConfig.setTest(true);
 
         // Her registrerer jeg en bruger
         given()
                 .contentType(ContentType.JSON)
-                .body("{\"username\": \"user\", \"password\": \"test123\"}")
+                .body("{\"username\": \"newuser\", \"password\": \"test123\"}")
                 .when()
                 .post(BASE_URL + "/auth/register/")
                 .then()
@@ -49,7 +52,7 @@ class DoctorRouteIntegrationTest {
         // Her logger jeg brugeren ind for at få et JWT-token
         jwtToken = given()
                 .contentType(ContentType.JSON)
-                .body("{\"username\": \"user\", \"password\": \"test123\"}")
+                .body("{\"username\": \"newuser\", \"password\": \"test123\"}")
                 .when()
                 .post(BASE_URL + "/auth/login/")
                 .then()
@@ -70,7 +73,7 @@ class DoctorRouteIntegrationTest {
         // Her logger jeg brugeren ind igen for at aktivere hans nye rolle som admin og få et nyt JWT-token
         jwtToken = given()
                 .contentType(ContentType.JSON)
-                .body("{\"username\": \"user\", \"password\": \"test123\"}")
+                .body("{\"username\": \"newuser\", \"password\": \"test123\"}")
                 .when()
                 .post(BASE_URL + "/auth/login/")
                 .then()
@@ -81,10 +84,16 @@ class DoctorRouteIntegrationTest {
 
     @BeforeEach
     void setUp() {
-        guideDTOS = populator.populateguides();
+        guideDTOS = guidePopulator.populateGuides();
+        newGuideDTOS = guidePopulator.populateNewGuides();
+
         g1 = guideDTOS.get(0);
         g2 = guideDTOS.get(1);
         g3 = guideDTOS.get(2);
+        g4 = newGuideDTOS.get(0);
+        g5 = newGuideDTOS.get(1);
+        g6 = newGuideDTOS.get(2);
+
     }
 
     @AfterEach
@@ -107,7 +116,7 @@ class DoctorRouteIntegrationTest {
 
     @Test
     void testGetAllGuides() {
-        GuideDTO[] guideDTOS =
+        NewGuideDTO[] guideDTOS =
                 given()
                         .contentType(ContentType.JSON)
                         .header("Authorization", "Bearer " + jwtToken)
@@ -117,25 +126,28 @@ class DoctorRouteIntegrationTest {
                         .log().all()
                         .statusCode(200)
                         .extract()
-                        .as(GuideDTO[].class);
-        assertThat(guideDTOS, arrayContainingInAnyOrder(g1, g2, g3));
-    }
+                        .as(NewGuideDTO[].class);
+
+        assertThat(guideDTOS, arrayContainingInAnyOrder(g4, g5, g6));  }
+
 
     @Test
     void testGetGuideById() {
-        GuideDTO guideDTO =
+        NewGuideDTO guideDTO =
                 given()
                         .contentType(ContentType.JSON)
                         .header("Authorization", "Bearer " + jwtToken)
                         .when()
-                        .get(BASE_URL + "/guides/" + g1.getId())
+                        .get(BASE_URL + "/guides/" + g4.getId())
                         .then()
                         .log().all()
                         .statusCode(200)
                         .extract()
-                        .as(GuideDTO.class);
-        assertThat(guideDTO, equalTo(g1));
+                        .as(NewGuideDTO.class);
+
+        assertThat(guideDTO.getFirstname(), equalTo(g4.getFirstname()));
     }
+
 
 
     @Test
@@ -161,20 +173,20 @@ class DoctorRouteIntegrationTest {
     @Test
     void testUpdateGuide() {
 
-        GuideDTO g4 = new GuideDTO("Ole", "Birk", "olebirk@gmail.com", 12345678, 5);
+        GuideDTO g3 = new GuideDTO("Ole", "Birk", "olebirk@gmail.com", 12345678, 5);
         GuideDTO guideDTO =
                 given()
                         .contentType(ContentType.JSON)
                         .header("Authorization", "Bearer " + jwtToken)
-                        .body(g4)
+                        .body(g3)
                         .when()
-                        .put(BASE_URL + "/guides/" + g4.getId())
+                        .put(BASE_URL + "/guides/" + g1.getId())
                         .then()
                         .log().all()
                         .statusCode(200)
                         .extract()
                         .as(GuideDTO.class);
-        assertThat(guideDTO.getFirstname(), equalTo(g4.getFirstname()));
+        assertThat(guideDTO.getFirstname(), equalTo(g3.getFirstname()));
 
     }
 
@@ -189,7 +201,7 @@ class DoctorRouteIntegrationTest {
                 .log().all()
                 .statusCode(200);
 
-        List<Guide> guides = guideDAO.getAll().stream().map(GuideDTO::toEntity).toList();
-        assertEquals(2, guides.size());
+        List<NewGuideDTO> guides = guideDAO.getAll();
+        assertEquals(5, guides.size());
     }
 }

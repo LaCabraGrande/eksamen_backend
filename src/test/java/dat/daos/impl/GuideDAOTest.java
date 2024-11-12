@@ -156,7 +156,7 @@ class GuideDAOTest {
 
     @Test
     void getAll() {
-        List<GuideDTO> guideDTOS = guideDAO.getAll();
+        List<NewGuideDTO> guideDTOS = guideDAO.getAll();
         Assertions.assertNotNull(guideDTOS);
         assertEquals(2, guideDTOS.size());
     }
