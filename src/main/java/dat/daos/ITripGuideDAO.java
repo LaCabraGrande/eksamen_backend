@@ -8,6 +8,6 @@ import java.util.Set;
 public interface ITripGuideDAO<T> {
 
     void addGuideToTrip(int tripId, int guideId);
-    Set<TripDTO> getTripsByGuide(int guideId);
+    Set<NewTripDTO> getTripsByGuide(int guideId);
 
 }

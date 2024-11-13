@@ -87,7 +87,7 @@ Authorization: Bearer {{jwt_token}}
 }
 
 ### Her sletter vi en guide ud fra id
-DELETE http://localhost:7070/api/guides/3
+DELETE http://localhost:7070/api/guides/5
 Authorization: Bearer {{jwt_token}}
 
 // Trips API
@@ -95,8 +95,8 @@ Authorization: Bearer {{jwt_token}}
 ### Her henter vi alle trips med evt. guides
 GET http://localhost:7070/api/trips
 
-### Her henter vi en trip ud fra id
-GET http://localhost:7070/api/trips/2
+### Her henter vi en trip ud fra id og evt. tilknyttet guide
+GET http://localhost:7070/api/trips/15
 
 ### Her opretter jeg en trip
 POST http://localhost:7070/api/trips/
@@ -142,7 +142,7 @@ DELETE http://localhost:7070/api/trips/13
 Authorization: Bearer {{jwt_token}}
 
 
-### Her henter jeg alle trips med en bestemt categoryType
+### Her henter jeg alle trips med en bestemt categoryType og evt. guides
 GET http://localhost:7070/api/trips/category/BEACH
 
 {

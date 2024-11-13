@@ -23,7 +23,7 @@ public class GuideDTO {
     private String email;
     private int phone;
     private int yearsOfExperience;
-    private Set<TripDTO> trips = new HashSet<>();
+    private Set<NewTripDTO> trips = new HashSet<>();
 
     public GuideDTO(int id, String firstname, String lastname, String email, int phone, int yearsOfExperience) {
         this.id = id;
@@ -42,7 +42,7 @@ public class GuideDTO {
         this.phone = guide.getPhone();
         this.yearsOfExperience = guide.getYearsOfExperience();
         if (guide.getTrips() != null) {
-            guide.getTrips().forEach(trip -> this.trips.add(new TripDTO(trip)));
+            guide.getTrips().forEach(trip -> this.trips.add(new NewTripDTO(trip)));
         }
     }
 

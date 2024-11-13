@@ -3,6 +3,7 @@ package dat.daos.impl;
 import dat.daos.IDAO;
 import dat.dtos.GuideDTO;
 import dat.dtos.NewGuideDTO;
+import dat.dtos.NewTripDTO;
 import dat.dtos.TripDTO;
 import dat.entities.*;
 import dat.exceptions.ApiException;
@@ -37,27 +38,17 @@ public class GuideDAO implements IDAO<GuideDTO> {
         }
     }
 
-    public GuideDTO create(GuideDTO guideDTO) {
-        try (EntityManager em = emf.createEntityManager()) {
-            em.getTransaction().begin();
-            Guide guide = new Guide(guideDTO);
-            em.persist(guide);
-            em.getTransaction().commit();
-            return new GuideDTO(guide);
-        }
-    }
-
     public GuideDTO getById(int id) {
         try (EntityManager em = emf.createEntityManager()) {
             Guide guide = em.find(Guide.class, id);
             if (guide == null) {
                 return null;
             }
-            Set<TripDTO> tripDTOs = new HashSet<>();
+            Set<NewTripDTO> newTripDTOS = new HashSet<>();
             for (Trip trip : guide.getTrips()) {
-                tripDTOs.add(new TripDTO(trip.getId(), trip.getStarttime(), trip.getEndtime(), trip.getLongitude(), trip.getLatitude(), trip.getName(), trip.getPrice(), trip.getCategoryType()));
+                newTripDTOS.add(new NewTripDTO(trip.getId(), trip.getStarttime(), trip.getEndtime(), trip.getLongitude(), trip.getLatitude(), trip.getName(), trip.getPrice(), trip.getCategoryType()));
             }
-            return new GuideDTO(guide.getId(), guide.getFirstname(), guide.getLastname(), guide.getEmail(), guide.getPhone(), guide.getYearsOfExperience(), tripDTOs);
+            return new GuideDTO(guide.getId(), guide.getFirstname(), guide.getLastname(), guide.getEmail(), guide.getPhone(), guide.getYearsOfExperience(), newTripDTOS);
         }
     }
 
@@ -67,18 +58,29 @@ public class GuideDAO implements IDAO<GuideDTO> {
             List<Guide> guides = query.getResultList();
             List<GuideDTO> guideDTOS = new ArrayList<>();
             for (Guide guide : guides) {
-                Set<TripDTO> tripDTOs = new HashSet<>();
+                Set<NewTripDTO> newTripDTOS = new HashSet<>();
                 for (Trip trip : guide.getTrips()) {
-                    tripDTOs.add(new TripDTO(trip.getId(), trip.getStarttime(), trip.getEndtime(), trip.getLongitude(), trip.getLatitude(), trip.getName(), trip.getPrice(), trip.getCategoryType()));
+                    newTripDTOS.add(new NewTripDTO(trip.getId(), trip.getStarttime(), trip.getEndtime(), trip.getLongitude(), trip.getLatitude(), trip.getName(), trip.getPrice(), trip.getCategoryType()));
                 }
-                guideDTOS.add(new GuideDTO(guide.getId(), guide.getFirstname(), guide.getLastname(), guide.getEmail(), guide.getPhone(), guide.getYearsOfExperience(), tripDTOs));
+                guideDTOS.add(new GuideDTO(guide.getId(), guide.getFirstname(), guide.getLastname(), guide.getEmail(), guide.getPhone(), guide.getYearsOfExperience(), newTripDTOS));
             }
             return guideDTOS;
         }
     }
 
-    @Override
-    public GuideDTO update(int id, GuideDTO guideDTO) {
+    public NewGuideDTO create(NewGuideDTO newGuideDTO) {
+        try (EntityManager em = emf.createEntityManager()) {
+            em.getTransaction().begin();
+            Guide guide = new Guide(newGuideDTO);
+            em.persist(guide);
+            em.getTransaction().commit();
+            return new NewGuideDTO(guide);
+        }
+    }
+
+
+
+    public NewGuideDTO update(int id, GuideDTO guideDTO) {
         try (EntityManager em = emf.createEntityManager()) {
             em.getTransaction().begin();
             Guide guide = em.find(Guide.class, id);
@@ -104,7 +106,7 @@ public class GuideDAO implements IDAO<GuideDTO> {
 
             Guide mergedGuide = em.merge(guide);
             em.getTransaction().commit();
-            return mergedGuide != null ? new GuideDTO(mergedGuide) : null;
+            return mergedGuide != null ? new NewGuideDTO(mergedGuide) : null;
         }
     }
 

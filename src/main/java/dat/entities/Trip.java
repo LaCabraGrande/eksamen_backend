@@ -2,6 +2,7 @@ package dat.entities;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonFormat;
+import dat.dtos.NewTripDTO;
 import jakarta.persistence.*;
 import lombok.*;
 import dat.dtos.TripDTO;
@@ -78,6 +79,16 @@ public class Trip {
         this.name = tripDTO.getName();
         this.price = tripDTO.getPrice();
         this.categoryType = tripDTO.getCategoryType();
+    }
+
+    public Trip(NewTripDTO newTripDTO) {
+        this.starttime = newTripDTO.getStarttime();
+        this.endtime = newTripDTO.getEndtime();
+        this.longitude = newTripDTO.getLongitude();
+        this.latitude = newTripDTO.getLatitude();
+        this.name = newTripDTO.getName();
+        this.price = newTripDTO.getPrice();
+        this.categoryType = newTripDTO.getCategoryType();
     }
 
 

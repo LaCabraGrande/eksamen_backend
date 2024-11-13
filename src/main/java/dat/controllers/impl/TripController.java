@@ -41,17 +41,28 @@ public class TripController implements IController<TripDTO> {
         try {
             int id = Integer.parseInt(ctx.pathParam("id"));
             TripDTO tripDTO = tripDAO.getById(id);
+
             if (tripDTO != null) {
                 ctx.res().setStatus(200);
                 ctx.json(tripDTO, NewTripDTO.class);
             } else {
-                throw new ApiException(404, "Trip not found with ID: " + id);
+                throw new ApiException(404, "Trip with ID " + id + "not found");
             }
+
         } catch (NumberFormatException e) {
             logger.error("Invalid Trip ID format: {}", ctx.pathParam("id"), e);
-            throw new ApiException(400, "Invalid ID format. Please provide a numeric ID.");
+            throw new ApiException(400, "Invalid ID format. Please provide a numeric ID!");
+
+        } catch (ApiException e) {
+            logger.error("Trip not found", e);
+            ctx.status(e.getStatusCode()).json(e.getMessage());
+
+        } catch (Exception e) {
+            logger.error("An unexpected error occurred while retrieving trip", e);
+            throw new ApiException(500, "Internal server error");
         }
     }
+
 
     @Override
     public void getAll(Context ctx) {
@@ -71,9 +82,9 @@ public class TripController implements IController<TripDTO> {
     @Override
     public void create(Context ctx) {
         try {
-            TripDTO tripDTO = ctx.bodyAsClass(TripDTO.class);
-            TripDTO newTripDTO = tripDAO.create(tripDTO);
-            ctx.status(201).json(newTripDTO);
+            NewTripDTO newTripDTO = ctx.bodyAsClass(NewTripDTO.class);
+            NewTripDTO savedTripDTO = tripDAO.create(newTripDTO);
+            ctx.status(201).json(savedTripDTO);
         } catch (BadRequestResponse e) {
             logger.error("Invalid request body", e);
             throw new ApiException(400, "Invalid request format");
@@ -88,7 +99,7 @@ public class TripController implements IController<TripDTO> {
         try {
             int id = Integer.parseInt(ctx.pathParam("id"));
             TripDTO tripDTO = ctx.bodyAsClass(TripDTO.class);
-            TripDTO updatedTripDTO = tripDAO.update(id, tripDTO);
+            NewTripDTO updatedTripDTO = tripDAO.update(id, tripDTO);
             if (updatedTripDTO != null) {
                 ctx.res().setStatus(200);
                 ctx.json(updatedTripDTO);
@@ -114,7 +125,7 @@ public class TripController implements IController<TripDTO> {
             TripDTO tripDTO = tripDAO.getById(id);
             if (tripDTO != null) {
                 tripDAO.delete(id);
-                ctx.status(200).json(Map.of("message", "Trip with ID " + id + " deleted"));
+                ctx.status(200).json(Map.of("message", "Trip with ID " + id + " has been deleted"));
             } else {
                 throw new ApiException(404, "Trip with ID " + id + " not found");
             }
@@ -152,12 +163,16 @@ public class TripController implements IController<TripDTO> {
             throw new ApiException(400, "Invalid category provided");
         }
         try {
-            List<TripDTO> trips = tripDAO.getTripsByCategory(categoryType);
-            if (trips.isEmpty()) {
-               logger.error("No trips found for category: {}", category);
-                throw new ApiException(404, "No trips found for category: " + category);
+            List<TripDTO> trips = tripDAO.getAll();
+
+            if (!trips.isEmpty()) {
+                List<TripDTO> tripsByCategory = trips.stream()
+                        .filter(trip -> trip.getCategoryType().equals(categoryType))
+                        .toList();
+                ctx.status(200).json(tripsByCategory);
             } else {
-                ctx.status(200).json(trips);
+                logger.error("No trips found for category: {}", category);
+                throw new ApiException(404, "No trips found for category: " + category);
             }
         } catch (Exception e) {
             logger.error("An unexpected error occurred for category: {}", category, e);
@@ -168,12 +183,13 @@ public class TripController implements IController<TripDTO> {
     public void getTripsByGuide(Context ctx) {
         try {
             int guideId = Integer.parseInt(ctx.pathParam("guideId"));
-            Set<TripDTO> trips = tripDAO.getTripsByGuide(guideId);
-            if (trips.isEmpty()) {
+            Set<NewTripDTO> trips = tripDAO.getTripsByGuide(guideId);
+           if (!trips.isEmpty()) {
+                ctx.json(trips);
+            } else {
                 logger.error("No trips found for guide with ID: {}", guideId);
                 throw new ApiException(404, "No trips found for guide with ID: " + guideId);
             }
-            ctx.json(trips);
         } catch (NumberFormatException e) {
             logger.error("Invalid Guide ID format: {}", ctx.pathParam("guideId"), e);
             throw new ApiException(400, "Invalid ID format. Please provide a numeric ID.");

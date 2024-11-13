@@ -11,7 +11,7 @@ import java.time.LocalTime;
 @Getter
 @Setter
 @NoArgsConstructor
-@AllArgsConstructor
+//@AllArgsConstructor
 public class NewTripDTO {
 
     private int id;
@@ -24,7 +24,7 @@ public class NewTripDTO {
     private String name;
     private int price;
     private Trip.CategoryType categoryType;
-    private GuideDTO guideDTO;
+    //private GuideDTO guideDTO;
 
     public NewTripDTO(int id, LocalTime starttime, LocalTime endtime, String longitude, String latitude, String name, int price, Trip.CategoryType categoryType) {
         this.id = id;
@@ -46,6 +46,16 @@ public class NewTripDTO {
         this.name = tripDTO.getName();
         this.price = tripDTO.getPrice();
         this.categoryType = tripDTO.getCategoryType();
+    }
+    public NewTripDTO(Trip trip) {
+        this.id = trip.getId();
+        this.starttime = trip.getStarttime();
+        this.endtime = trip.getEndtime();
+        this.longitude = trip.getLongitude();
+        this.latitude = trip.getLatitude();
+        this.name = trip.getName();
+        this.price = trip.getPrice();
+        this.categoryType = trip.getCategoryType();
     }
 
 }

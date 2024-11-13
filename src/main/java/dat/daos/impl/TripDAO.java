@@ -42,7 +42,7 @@ public class TripDAO implements IDAO<TripDTO>, ITripGuideDAO<TripDTO> {
         try (EntityManager em = emf.createEntityManager()) {
             Trip trip = em.find(Trip.class, id);
             if(trip == null) {
-                throw new ApiException(404, "Trip not found with ID: " + id);
+                return null;
             }
             NewGuideDTO newGuideDTO = null;
             if (trip.getGuide() != null) {
@@ -61,27 +61,30 @@ public class TripDAO implements IDAO<TripDTO>, ITripGuideDAO<TripDTO> {
                 NewGuideDTO newGuideDTO = null;
                 if (trip.getGuide() != null) {
                     newGuideDTO = new NewGuideDTO(trip.getGuide().getId(), trip.getGuide().getFirstname(), trip.getGuide().getLastname(), trip.getGuide().getEmail(), trip.getGuide().getPhone(), trip.getGuide().getYearsOfExperience());
+                    tripDTOS.add(new TripDTO(trip.getId(), trip.getStarttime(), trip.getEndtime(), trip.getLongitude(), trip.getLatitude(), trip.getName(), trip.getPrice(), trip.getCategoryType(), newGuideDTO));
+                } else {
+                    tripDTOS.add(new TripDTO(trip.getId(), trip.getStarttime(), trip.getEndtime(), trip.getLongitude(), trip.getLatitude(), trip.getName(), trip.getPrice(), trip.getCategoryType()));
                 }
-                tripDTOS.add(new TripDTO(trip.getId(), trip.getStarttime(), trip.getEndtime(), trip.getLongitude(), trip.getLatitude(), trip.getName(), trip.getPrice(), trip.getCategoryType(), newGuideDTO));
+
             }
             return tripDTOS;
         }
     }
 
-    public TripDTO create(TripDTO tripDTO) {
+    public NewTripDTO create(NewTripDTO newTripDTO) {
         try (EntityManager em = emf.createEntityManager()) {
             em.getTransaction().begin();
-            Trip trip = new Trip(tripDTO);
+            Trip trip = new Trip(newTripDTO);
             em.persist(trip);
             em.getTransaction().commit();
-            return new TripDTO(trip);
+            return new NewTripDTO(trip);
         } catch (Exception e) {
             logger.error("Error creating trip", e);
             throw new JpaException("Error creating trip", e);
         }
     }
 
-    public TripDTO update(int id, TripDTO tripDTO) {
+    public NewTripDTO update(int id, TripDTO tripDTO) {
         try (EntityManager em = emf.createEntityManager()) {
             em.getTransaction().begin();
             Trip t = em.find(Trip.class, id);
@@ -96,7 +99,7 @@ public class TripDAO implements IDAO<TripDTO>, ITripGuideDAO<TripDTO> {
                 em.merge(t);
             }
             em.getTransaction().commit();
-            return t != null ? new TripDTO(t) : null;
+            return t != null ? new NewTripDTO(t) : null;
         }
     }
 
@@ -155,12 +158,12 @@ public class TripDAO implements IDAO<TripDTO>, ITripGuideDAO<TripDTO> {
     }
 
     @Override
-    public Set<TripDTO> getTripsByGuide(int guideId) {
+    public Set<NewTripDTO> getTripsByGuide(int guideId) {
         try(EntityManager em = emf.createEntityManager()) {
             Guide guide = em.find(Guide.class, guideId);
             if (guide != null) {
                 return guide.getTrips().stream()
-                        .map(TripDTO::new)
+                        .map(NewTripDTO::new)
                         .collect(Collectors.toSet());
             }
             return Set.of();

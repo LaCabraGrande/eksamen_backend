@@ -23,7 +23,7 @@ public class TripDTO {
     private String name;
     private int price;
     private Trip.CategoryType categoryType;
-    private NewGuideDTO newGuideDTO;
+    private NewGuideDTO guide;
 
 
     public TripDTO(int id, LocalTime starttime, LocalTime endtime, String longitude, String latitude, String name, int price, Trip.CategoryType categoryType) {

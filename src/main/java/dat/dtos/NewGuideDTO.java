@@ -1,5 +1,6 @@
 package dat.dtos;
 
+import dat.entities.Guide;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -43,6 +44,15 @@ public class NewGuideDTO {
         this.email = guideDTO.getEmail();
         this.phone = guideDTO.getPhone();
         this.yearsOfExperience = guideDTO.getYearsOfExperience();
+    }
+
+    public NewGuideDTO(Guide guide) {
+        this.id = guide.getId();
+        this.firstname = guide.getFirstname();
+        this.lastname = guide.getLastname();
+        this.email = guide.getEmail();
+        this.phone = guide.getPhone();
+        this.yearsOfExperience = guide.getYearsOfExperience();
     }
 
 }

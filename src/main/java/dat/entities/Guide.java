@@ -3,6 +3,7 @@ package dat.entities;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import dat.dtos.GuideDTO;
+import dat.dtos.NewGuideDTO;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -66,6 +67,14 @@ public class Guide {
         this.email = guideDTO.getEmail();
         this.phone = guideDTO.getPhone();
         this.yearsOfExperience = guideDTO.getYearsOfExperience();
+    }
+
+    public Guide(NewGuideDTO newGuideDTO) {
+        this.firstname = newGuideDTO.getFirstname();
+        this.lastname = newGuideDTO.getLastname();
+        this.email = newGuideDTO.getEmail();
+        this.phone = newGuideDTO.getPhone();
+        this.yearsOfExperience = newGuideDTO.getYearsOfExperience();
     }
 
     public void setTrips(Set<Trip> trips) {

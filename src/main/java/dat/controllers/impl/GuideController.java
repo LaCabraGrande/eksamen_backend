@@ -32,17 +32,28 @@ public class GuideController implements IController<GuideDTO> {
         try {
             int id = Integer.parseInt(ctx.pathParam("id"));
             GuideDTO guideDTO = guideDAO.getById(id);
+
             if (guideDTO != null) {
                 ctx.res().setStatus(200);
                 ctx.json(guideDTO);
             } else {
-                throw new ApiException(404, "Guide with ID "+ id + " not found");
+                throw new ApiException(404, "Guide with ID " + id + " not found");
             }
+
+        } catch (NumberFormatException e) {
+            logger.error("Invalid guide ID format", e);
+            throw new ApiException(400, "Invalid ID format. Please provide a numeric ID!");
+
+        } catch (ApiException e) {
+            logger.error("Guide not found", e);
+            ctx.status(e.getStatusCode()).json(e.getMessage());
+
         } catch (Exception e) {
-            logger.error("Invalid guide ID", e);
-            throw new ApiException(400, "An error occurred while trying to get guide with ID: " + ctx.pathParam("id"));
+            logger.error("An unexpected error occurred while retrieving guide", e);
+            throw new ApiException(500, "Internal server error");
         }
     }
+
 
     @Override
     public void getAll(Context ctx) {
@@ -62,8 +73,8 @@ public class GuideController implements IController<GuideDTO> {
     @Override
     public void create(Context ctx) {
         try {
-            GuideDTO guideDTO = ctx.bodyAsClass(GuideDTO.class);
-            GuideDTO savedGuideDTO = guideDAO.create(guideDTO);
+            NewGuideDTO guideDTO = ctx.bodyAsClass(NewGuideDTO.class);
+            NewGuideDTO savedGuideDTO = guideDAO.create(guideDTO);
             ctx.status(201).json(savedGuideDTO);
         } catch (Exception e) {
             logger.error("Invalid guide data", e);
@@ -76,7 +87,7 @@ public class GuideController implements IController<GuideDTO> {
         try {
             int id = Integer.parseInt(ctx.pathParam("id"));
             GuideDTO guideDTO = ctx.bodyAsClass(GuideDTO.class);
-            GuideDTO updatedGuideDTO = guideDAO.update(id, guideDTO);
+            NewGuideDTO updatedGuideDTO = guideDAO.update(id, guideDTO);
             if (updatedGuideDTO != null) {
                 ctx.status(200).json(updatedGuideDTO);
             } else {
