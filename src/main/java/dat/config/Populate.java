@@ -29,18 +29,18 @@ public class Populate {
     // Metode til at populere databasen med doctors og appointments
     public static void populateDatabase() {
 
-        Trip trip1 = new Trip(LocalTime.of(8, 0), LocalTime.of(16, 0), "12.345", "23.456", "Trip1", 100, Trip.CategoryType.FOREST);
-        Trip trip2 = new Trip(LocalTime.of(9, 0), LocalTime.of(17, 0), "12.345", "23.456", "Trip2", 200, Trip.CategoryType.FOREST);
-        Trip trip3 = new Trip(LocalTime.of(10, 0), LocalTime.of(18, 0), "12.345", "23.456", "Trip3", 300, Trip.CategoryType.BEACH);
-        Trip trip4 = new Trip(LocalTime.of(11, 0), LocalTime.of(19, 0), "12.345", "23.456", "Trip4", 400, Trip.CategoryType.CITY);
-        Trip trip5 = new Trip(LocalTime.of(12, 0), LocalTime.of(20, 0), "12.345", "23.456", "Trip5", 500, Trip.CategoryType.FOREST);
-        Trip trip6 = new Trip(LocalTime.of(13, 0), LocalTime.of(21, 0), "12.345", "23.456", "Trip6", 600, Trip.CategoryType.CITY);
-        Trip trip7 = new Trip(LocalTime.of(14, 0), LocalTime.of(22, 0), "12.345", "23.456", "Trip7", 700, Trip.CategoryType.BEACH);
-        Trip trip8 = new Trip(LocalTime.of(15, 0), LocalTime.of(23, 0), "12.345", "23.456", "Trip8", 800, Trip.CategoryType.CITY);
-        Trip trip9 = new Trip(LocalTime.of(16, 0), LocalTime.of(0, 0), "12.345", "23.456", "Trip9", 900, Trip.CategoryType.FOREST);
-        Trip trip10 = new Trip(LocalTime.of(17, 0), LocalTime.of(1, 0), "12.345", "23.456", "Trip10", 1000, Trip.CategoryType.CITY);
-        Trip trip11 = new Trip(LocalTime.of(18, 0), LocalTime.of(2, 0), "12.345", "23.456", "Trip11", 1100, Trip.CategoryType.BEACH);
-        Trip trip12 = new Trip(LocalTime.of(19, 0), LocalTime.of(3, 0), "12.345", "23.456", "Trip12", 1200, Trip.CategoryType.CITY);
+        Trip trip1 = new Trip(LocalTime.of(8, 0), LocalTime.of(16, 0), "55.6761", "12.5683", "Morning Forest Hike", 12, Trip.CategoryType.FOREST);
+        Trip trip2 = new Trip(LocalTime.of(9, 0), LocalTime.of(17, 0), "55.6761", "12.5683", "Extended Forest Exploration", 18, Trip.CategoryType.FOREST);
+        Trip trip3 = new Trip(LocalTime.of(10, 0), LocalTime.of(18, 0), "57.0488", "9.9217", "Beach Relaxation at Skagen", 25, Trip.CategoryType.BEACH);
+        Trip trip4 = new Trip(LocalTime.of(11, 0), LocalTime.of(19, 0), "55.4038", "10.4024", "City Tour in Odense", 10, Trip.CategoryType.CITY);
+        Trip trip5 = new Trip(LocalTime.of(12, 0), LocalTime.of(20, 0), "56.2639", "9.5018", "Midday Forest Adventure", 15, Trip.CategoryType.FOREST);
+        Trip trip6 = new Trip(LocalTime.of(13, 0), LocalTime.of(21, 0), "55.6759", "12.5655", "Afternoon Copenhagen Sightseeing", 20, Trip.CategoryType.CITY);
+        Trip trip7 = new Trip(LocalTime.of(14, 0), LocalTime.of(22, 0), "55.4732", "8.4412", "Evening Walk at Esbjerg Beach", 8, Trip.CategoryType.BEACH);
+        Trip trip8 = new Trip(LocalTime.of(15, 0), LocalTime.of(23, 0), "55.6761", "12.5683", "Nightlife in Copenhagen", 5, Trip.CategoryType.CITY);
+        Trip trip9 = new Trip(LocalTime.of(16, 0), LocalTime.of(0, 0), "56.1325", "9.2286", "Twilight Forest Stroll", 10, Trip.CategoryType.FOREST);
+        Trip trip10 = new Trip(LocalTime.of(17, 0), LocalTime.of(1, 0), "55.6905", "12.4858", "Midnight City Lights", 6, Trip.CategoryType.CITY);
+        Trip trip11 = new Trip(LocalTime.of(18, 0), LocalTime.of(2, 0), "55.5269", "8.4051", "Beach Bonfire at West Coast", 7, Trip.CategoryType.BEACH);
+        Trip trip12 = new Trip(LocalTime.of(19, 0), LocalTime.of(3, 0), "55.6761", "12.5683", "Late-Night City Excursion", 4, Trip.CategoryType.CITY);
 
 
 
