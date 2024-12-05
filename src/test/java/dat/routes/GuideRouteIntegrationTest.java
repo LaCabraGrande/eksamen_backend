@@ -1,40 +1,40 @@
-package dat.routes;
-
-import dat.config.ApplicationConfig;
-import dat.config.HibernateConfig;
-import dat.daos.impl.GuideDAO;
-import dat.dtos.GuideDTO;
-import dat.dtos.NewGuideDTO;
-import io.javalin.Javalin;
-import io.restassured.http.ContentType;
-import jakarta.persistence.EntityManager;
-import jakarta.persistence.EntityManagerFactory;
-import org.junit.jupiter.api.*;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import java.util.List;
-
-import static io.restassured.RestAssured.given;
-import static org.hamcrest.CoreMatchers.equalTo;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.arrayContainingInAnyOrder;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-
-@TestInstance(TestInstance.Lifecycle.PER_CLASS)
-class GuideRouteIntegrationTest {
-    private static final Logger logger = LoggerFactory.getLogger(GuideRouteIntegrationTest.class);
-    private static final EntityManagerFactory emf = HibernateConfig.getEntityManagerFactoryForTest();
-    private static final GuideDAO guideDAO = GuideDAO.getInstance(emf);
-    private static final String BASE_URL = "http://localhost:7070/api";
-    private static final GuidePopulator guidePopulator = new GuidePopulator(guideDAO, emf);
-    private Javalin app;
-    private GuideDTO g1, g2, g3;
-    private NewGuideDTO g4, g5, g6;
-    private List<GuideDTO> guideDTOS;
-    private List<NewGuideDTO> newGuideDTOS;
-    private String jwtToken;
-
+//package dat.routes;
+//
+//import dat.config.ApplicationConfig;
+//import dat.config.HibernateConfig;
+//import dat.daos.impl.GuideDAO;
+//import dat.dtos.GuideDTO;
+//import dat.dtos.NewGuideDTO;
+//import io.javalin.Javalin;
+//import io.restassured.http.ContentType;
+//import jakarta.persistence.EntityManager;
+//import jakarta.persistence.EntityManagerFactory;
+//import org.junit.jupiter.api.*;
+//import org.slf4j.Logger;
+//import org.slf4j.LoggerFactory;
+//
+//import java.util.List;
+//
+//import static io.restassured.RestAssured.given;
+//import static org.hamcrest.CoreMatchers.equalTo;
+//import static org.hamcrest.MatcherAssert.assertThat;
+//import static org.hamcrest.Matchers.arrayContainingInAnyOrder;
+//import static org.junit.jupiter.api.Assertions.assertEquals;
+//
+//@TestInstance(TestInstance.Lifecycle.PER_CLASS)
+//class GuideRouteIntegrationTest {
+//    private static final Logger logger = LoggerFactory.getLogger(GuideRouteIntegrationTest.class);
+//    private static final EntityManagerFactory emf = HibernateConfig.getEntityManagerFactoryForTest();
+//    private static final GuideDAO guideDAO = GuideDAO.getInstance(emf);
+//    private static final String BASE_URL = "http://localhost:7070/api";
+//    private static final GuidePopulator guidePopulator = new GuidePopulator(guideDAO, emf);
+//    private Javalin app;
+//    private GuideDTO g1, g2, g3;
+//    private NewGuideDTO g4, g5, g6;
+//    private List<GuideDTO> guideDTOS;
+//    private List<NewGuideDTO> newGuideDTOS;
+//    private String jwtToken;
+//
 //    @BeforeAll
 //    void init() {
 //        ApplicationConfig.startServer();
@@ -204,4 +204,4 @@ class GuideRouteIntegrationTest {
 //        List<NewGuideDTO> guides = guideDAO.getAll();
 //        assertEquals(5, guides.size());
 //    }
-}
+//}

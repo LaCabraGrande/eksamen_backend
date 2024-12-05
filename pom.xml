@@ -232,9 +232,7 @@
                 <version>3.0.0</version>
                 <configuration>
                     <excludes>
-                        <exclude>**/dat/daos/impl/TripDAOTest.java</exclude>
-                        <exclude>**/dat/routes/GuideRouteIntegrationTest.java</exclude>
-                        <exclude>**/dat/routes/TripRouteIntegrationTest.java</exclude>
+
                     </excludes>
                 </configuration>
             </plugin>
